@@ -33,6 +33,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/config.vala
     src/View/AppToolbar.vala
     src/View/AppMenu.vala
+    src/View/MainWindow.vala
     src/Activities.vala
 # tell what libraries to use when compiling
 PACKAGES

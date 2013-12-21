@@ -76,7 +76,7 @@ namespace Activities {
         }
 
         private Settings.SavedState savedState;
-        private Gtk.Window window;
+        private View.MainWindow window;
 
         protected override void activate() {
             if (get_windows() != null) {
@@ -113,10 +113,7 @@ namespace Activities {
 
 // TODO : move to an other class
         void createWindow() {
-            window = new Gtk.Window();
-            window.title = program_name;
-            window.icon_name = "preferences-system-time";
-            window.set_size_request(700, 400);
+            window = new View.MainWindow(this.program_name);
             window.default_width = savedState.window_width;
             window.default_height = savedState.window_height;
             window.window_position = Gtk.WindowPosition.CENTER;
