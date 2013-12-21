@@ -10,12 +10,12 @@ namespace TimeShift.Settings {
 
     public class SavedState : Granite.Services.Settings {
 
-        public int windowWidth { get; set; }
-        public int windowHeight { get; set; }
-        public WindowState windowState { get; set; }
+        public int window_width { get; set; }
+        public int window_height { get; set; }
+        public WindowState window_state { get; set; }
 
-        public SavedState () {
-            base ("fabien.timeshift.savedstate");
+        public SavedState() {
+            base("fabien.timeshift.savedstate");
         }
     }
 }

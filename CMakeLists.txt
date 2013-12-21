@@ -1,54 +1,46 @@
-project(timeshift)
-set(RELEASE_NAME "Time Shift time tracker.")
-set(VERSION "0.1")
-set(VERSION_INFO "Release")
-set(DATADIR "${CMAKE_INSTALL_PREFIX}/share/timeshift")
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+project (timeshift)
 
-# First checks
-cmake_minimum_required (VERSION 2.8)
-cmake_policy (VERSION 2.8)
-find_package(Vala REQUIRED)
-find_package(PkgConfig)
+cmake_minimum_required (VERSION 2.6)
 
-# Some configuration
-configure_file(${CMAKE_SOURCE_DIR}/src/config.vala.cmake ${CMAKE_SOURCE_DIR}/src/config.vala)
+set (EXEC_NAME "timeshift")
+set (RELEASE_NAME "A hello world.")
+set (VERSION "0.1")
+set (VERSION_INFO "Release")
+set (GETTEXT_PACKAGE "timeshift")
+set (DATADIR "${CMAKE_INSTALL_PREFIX}/share")
+set (PKGDATADIR "${DATADIR}/timeshift")
 
-# Vala
-include(ValaVersion)
-include(ValaPrecompile)
-ensure_vala_version ("0.22" MINIMUM)
+list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+add_definitions ("-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"")
 
-# Dependencies
-set(TIMESHIFT_DEPS gtk+-3.0 granite)
+find_package (PkgConfig)
+pkg_check_modules (DEPS REQUIRED gtk+-3.0 granite)
 
-pkg_check_modules(GTK+ REQUIRED "gtk+-3.0 >= 3.10")
-pkg_check_modules(DEPS REQUIRED ${TIMESHIFT_DEPS})
+add_definitions (${DEPS_CFLAGS})
+link_libraries (${DEPS_LIBRARIES})
+link_directories (${DEPS_LIBRARY_DIRS})
 
-add_definitions(${DEPS_CFLAGS})
-add_definitions(-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\")
-add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
-add_definitions(-w) # Disable gcc warnings
+find_package (Vala REQUIRED)
+include (ValaVersion)
+include (ValaPrecompile)
+ensure_vala_version ("0.16" MINIMUM)
 
-link_libraries(${DEPS_LIBRARIES})
-link_directories(${DEPS_LIBRARY_DIRS})
-
-include_directories(${CMAKE_BINARY_DIR}/src)
-
-# Sources
-vala_precompile(VALA_C
-    src/TimeShift.vala
+# files we want to compile
+vala_precompile (VALA_C ${EXEC_NAME}
     src/Settings/SavedState.vala
+    src/config.vala
     src/View/AppToolbar.vala
     src/View/AppMenu.vala
-    src/config.vala
+    src/TimeShift.vala
+# tell what libraries to use when compiling
 PACKAGES
-    ${TIMESHIFT_DEPS}
+    gtk+-3.0 granite
 )
 
-# Executable
-add_executable (timeshift ${VALA_C})
+add_executable (${EXEC_NAME} ${VALA_C})
 
-# Installation
-install(TARGETS timeshift RUNTIME DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/timeshift.desktop DESTINATION share/applications)
+include (GSettings)
+add_schema ("schemas/fabien.timeshift.gschema.xml")
+
+install (TARGETS ${EXEC_NAME} RUNTIME DESTINATION bin)
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/timeshift.desktop DESTINATION ${DATADIR}/applications/)

@@ -8,7 +8,7 @@
   MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
   PURPOSE. See the GNU General Public License for more details.
   You should have received a copy of the GNU General Public License along
-  with this program. If not, see 
+  with this program. If not, see
 ***/
 
 namespace TimeShift {
@@ -87,7 +87,7 @@ namespace TimeShift {
             initPreferences();
             initUI();
             window.show_all();
-            
+
             Gtk.main();
         }
 
@@ -104,9 +104,9 @@ namespace TimeShift {
 
             add_window(window);
 
-            if (savedState.windowState == Settings.WindowState.MAXIMIZED) {
+            if (savedState.window_state == Settings.WindowState.MAXIMIZED) {
                 window.maximize();
-            } else if (savedState.windowState == Settings.WindowState.FULLSCREEN) {
+            } else if (savedState.window_state == Settings.WindowState.FULLSCREEN) {
                 window.fullscreen();
             }
         }
@@ -117,8 +117,8 @@ namespace TimeShift {
             window.title = program_name;
             window.icon_name = "clock";
             window.set_size_request(700, 400);
-            window.default_width = savedState.windowWidth;
-            window.default_height = savedState.windowHeight;
+            window.default_width = savedState.window_width;
+            window.default_height = savedState.window_height;
             window.window_position = Gtk.WindowPosition.CENTER;
 
             window.delete_event.connect((e) => {
@@ -151,19 +151,19 @@ namespace TimeShift {
 
             // Save window state
             if ((window.get_window().get_state() & Settings.WindowState.MAXIMIZED) != 0) {
-                savedState.windowState = Settings.WindowState.MAXIMIZED;
+                savedState.window_state = Settings.WindowState.MAXIMIZED;
             } else if ((window.get_window().get_state() & Settings.WindowState.FULLSCREEN) != 0) {
-                savedState.windowState = Settings.WindowState.FULLSCREEN;
+                savedState.window_state = Settings.WindowState.FULLSCREEN;
             } else {
-                savedState.windowState = Settings.WindowState.NORMAL;
+                savedState.window_state = Settings.WindowState.NORMAL;
             }
 
             // Save window size
-            if (savedState.windowState == Settings.WindowState.NORMAL) {
+            if (savedState.window_state == Settings.WindowState.NORMAL) {
                 int width, height;
                 window.get_size(out width, out height);
-                savedState.windowWidth = width;
-                savedState.windowHeight = height;
+                savedState.window_width = width;
+                savedState.window_height = height;
             }
         }
     }
