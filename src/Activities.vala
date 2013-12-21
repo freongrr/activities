@@ -17,66 +17,34 @@ namespace Activities {
         private static bool PRINT_VERSION = false;
     }
 
-    private Application app;
-
-    public static int main(string[] args) {
-
-        var context = new OptionContext("Activities");
-        context.set_help_enabled(true);
-        context.add_main_entries(command_line_options, "activities");
-        context.add_group(Gtk.get_option_group(true));
-
-        try {
-            context.parse(ref args);
-        } catch(Error e) {
-            warning(e.message);
-        }
-
-        if(CommandLineOption.PRINT_VERSION) {
-            stdout.printf("Activities %s\n", Build.VERSION);
-            stdout.printf("Copyright 2013 Fabien Cortina.\n");
-            return 0;
-        }
-
-        Gtk.init(ref args);
-        app = new Application();
-        return app.run(args);
-    }
-
-    private static const OptionEntry[] command_line_options = {
-        { "version", 'v', 0, OptionArg.NONE, out CommandLineOption.PRINT_VERSION, "Print version info and exit", null },
-        { null }
-    };
-
     public class Application : Granite.Application {
 
         construct {
-            build_data_dir = Build.DATADIR;
-            build_pkg_data_dir = Build.PKGDATADIR;
-            build_release_name = Build.RELEASE_NAME;
-            build_version = Build.VERSION;
-            build_version_info = Build.VERSION_INFO;
+            this.build_data_dir = Build.DATADIR;
+            this.build_pkg_data_dir = Build.PKGDATADIR;
+            this.build_release_name = Build.RELEASE_NAME;
+            this.build_version = Build.VERSION;
+            this.build_version_info = Build.VERSION_INFO;
 
-            program_name = "Activities";
-            exec_name = "activities";
+            this.program_name = "Activities";
+            this.exec_name = "activities";
 
-            app_years = "2013-2014";
-            application_id = "lp.fabien.cortina.activities"; // TODO ???
-            app_icon = "preferences-system-time";
-            app_launcher = "activities.desktop";
+            this.app_years = "2013-2014";
+            this.application_id = "lp.fabien.cortina.activities";
+            this.app_icon = "preferences-system-time";
+            this.app_launcher = "activities.desktop";
 
-            // TODO
-            main_url = "https://launchpad.net/~fabien.cortina";
-            bug_url = "https://bugs.launchpad.net/~fabien.cortina";
-            help_url = "https://answers.launchpad.net/~fabien.cortina";
-            translate_url = "https://translations.launchpad.net/~fabien.cortina";
+            this.main_url = "https://launchpad.net/~fabien.cortina";
+            this.bug_url = "https://bugs.launchpad.net/~fabien.cortina";
+            this.help_url = "https://answers.launchpad.net/~fabien.cortina";
+            this.translate_url = "https://translations.launchpad.net/~fabien.cortina";
 
-            about_authors = {"Fabien Cortina <fabien.cortina@gmail.com>"};
-            about_license_type = Gtk.License.GPL_3_0;
+            this.about_authors = {"Fabien Cortina <fabien.cortina@gmail.com>"};
+            this.about_license_type = Gtk.License.GPL_3_0;
         }
 
-        private Settings.SavedState savedState;
-        private View.MainWindow window;
+        private Settings.SavedState saved_state;
+        private View.MainWindow main_window;
 
         protected override void activate() {
             if (get_windows() != null) {
@@ -84,85 +52,104 @@ namespace Activities {
                 return;
             }
 
-            initPreferences();
-            initUI();
-            window.show_all();
+            this.saved_state = new Settings.SavedState();
+
+            create_main_window();
+            create_toolbar();
+
+            add_window(main_window);
+            main_window.show_all();
 
             Gtk.main();
         }
 
-        void initPreferences() {
-            savedState = new Settings.SavedState();
-        }
-
-        void initUI() {
-            createWindow();
-            createToolbar();
-
-            // TODO : UI goes here
-            window.add(new Gtk.Label("Hello Again World!"));
-
-            add_window(window);
-
-            if (savedState.window_state == Settings.WindowState.MAXIMIZED) {
-                window.maximize();
-            } else if (savedState.window_state == Settings.WindowState.FULLSCREEN) {
-                window.fullscreen();
-            }
-        }
-
-// TODO : move to an other class
-        void createWindow() {
-            window = new View.MainWindow(this.program_name);
-            window.default_width = savedState.window_width;
-            window.default_height = savedState.window_height;
-            window.window_position = Gtk.WindowPosition.CENTER;
-
-            window.delete_event.connect((e) => {
-                updateSavedState();
-                return false;
-            });
-
-            window.destroy.connect((e) => { Gtk.main_quit(); });
+        private void create_main_window() {
+            main_window = new View.MainWindow(this.program_name);
+            main_window.destroy.connect((e) => { Gtk.main_quit(); });
+            main_window.delete_event.connect((e) => { update_saved_state(); return false; });
 
             // TODO : is there no better way to register shortcuts???
-            window.key_press_event.connect((e) => {
+            main_window.key_press_event.connect((e) => {
                 switch (e.keyval) {
                     case Gdk.Key.@q:
                         if ((e.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-                            window.destroy();
+                            main_window.destroy();
                         }
                         break;
                 }
                 return false;
             });
+
+            restore_state();
         }
 
-        void createToolbar() {
-            View.AppToolbar toolbar = new View.AppToolbar();
-            toolbar.menu.about.activate.connect(() => show_about(window));
-            window.set_titlebar(toolbar);
+        private void restore_state() {
+            debug("Restoring from saved state");
+            main_window.default_width = saved_state.window_width;
+            main_window.default_height = saved_state.window_height;
+            main_window.window_position = Gtk.WindowPosition.CENTER;
+
+            if (saved_state.window_state == Settings.WindowState.MAXIMIZED) {
+                main_window.maximize();
+            } else if (saved_state.window_state == Settings.WindowState.FULLSCREEN) {
+                main_window.fullscreen();
+            }
         }
 
-        void updateSavedState() {
+        private void update_saved_state() {
             debug("Updating saved state");
 
-            // Save window state
-            if ((window.get_window().get_state() & Settings.WindowState.MAXIMIZED) != 0) {
-                savedState.window_state = Settings.WindowState.MAXIMIZED;
-            } else if ((window.get_window().get_state() & Settings.WindowState.FULLSCREEN) != 0) {
-                savedState.window_state = Settings.WindowState.FULLSCREEN;
+            // Save state
+            if ((main_window.get_window().get_state() & Settings.WindowState.MAXIMIZED) != 0) {
+                saved_state.window_state = Settings.WindowState.MAXIMIZED;
+            } else if ((main_window.get_window().get_state() & Settings.WindowState.FULLSCREEN) != 0) {
+                saved_state.window_state = Settings.WindowState.FULLSCREEN;
             } else {
-                savedState.window_state = Settings.WindowState.NORMAL;
+                saved_state.window_state = Settings.WindowState.NORMAL;
             }
 
-            // Save window size
-            if (savedState.window_state == Settings.WindowState.NORMAL) {
+            // Save size
+            if (saved_state.window_state == Settings.WindowState.NORMAL) {
                 int width, height;
-                window.get_size(out width, out height);
-                savedState.window_width = width;
-                savedState.window_height = height;
+                main_window.get_size(out width, out height);
+                saved_state.window_width = width;
+                saved_state.window_height = height;
             }
         }
+
+        private void create_toolbar() {
+            View.AppToolbar toolbar = new View.AppToolbar();
+            toolbar.menu.about.activate.connect(() => show_about(main_window));
+            main_window.set_titlebar(toolbar);
+        }
     }
+
+    public static int main(string[] args) {
+        var context = new OptionContext("Activities");
+        context.set_help_enabled(true);
+        context.add_main_entries(command_line_options, "activities");
+        context.add_group(Gtk.get_option_group(true));
+
+        try {
+            context.parse(ref args);
+        } catch (Error e) {
+            warning(e.message);
+        }
+
+        if (CommandLineOption.PRINT_VERSION) {
+            stdout.printf("Activities %s\n", Build.VERSION);
+            stdout.printf("Copyright 2013 Fabien Cortina.\n");
+            return 0;
+        }
+
+        Gtk.init(ref args);
+
+        Application app = new Application();
+        return app.run(args);
+    }
+
+    private static const OptionEntry[] command_line_options = {
+        { "version", 'v', 0, OptionArg.NONE, out CommandLineOption.PRINT_VERSION, "Print version info and exit", null },
+        { null }
+    };
 }

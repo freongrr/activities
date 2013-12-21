@@ -19,41 +19,9 @@ namespace Activities.View {
             this.title = title;
             this.icon_name = "preferences-system-time";
             this.set_size_request(700, 400);
-//            this.default_width = savedState.window_width;
-//            this.default_height = savedState.window_height;
-//            this.window_position = Gtk.WindowPosition.CENTER;
 
             // TODO : UI goes here
             this.add(new Gtk.Label("Hello Again World!"));
-
-//            if (savedState.window_state == Settings.WindowState.MAXIMIZED) {
-//                this.maximize();
-//            } else if (savedState.window_state == Settings.WindowState.FULLSCREEN) {
-//                this.fullscreen();
-//            }
         }
-
-/*
-        void updateSavedState() {
-            debug("Updating saved state");
-
-            // Save window state
-            if ((this.get_window().get_state() & Settings.WindowState.MAXIMIZED) != 0) {
-                savedState.window_state = Settings.WindowState.MAXIMIZED;
-            } else if ((this.get_window().get_state() & Settings.WindowState.FULLSCREEN) != 0) {
-                savedState.window_state = Settings.WindowState.FULLSCREEN;
-            } else {
-                savedState.window_state = Settings.WindowState.NORMAL;
-            }
-
-            // Save window size
-            if (savedState.window_state == Settings.WindowState.NORMAL) {
-                int width, height;
-                this.get_size(out width, out height);
-                savedState.window_width = width;
-                savedState.window_height = height;
-            }
-        }
-*/
     }
 }
