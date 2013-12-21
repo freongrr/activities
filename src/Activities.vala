@@ -127,7 +127,9 @@ namespace Activities {
 
         private void create_toolbar() {
             View.AppToolbar toolbar = new View.AppToolbar();
-            toolbar.menu.about.activate.connect(() => show_about(main_window));
+            toolbar.menu.about  .activate.connect(() => show_about(main_window));
+            toolbar.title = this.program_name;
+            toolbar.subtitle = "Keep track of your time";
             main_window.set_titlebar(toolbar);
         }
     }
