@@ -62,7 +62,7 @@ namespace Activities {
 
             app_years = "2013-2014";
             application_id = "lp.fabien.cortina.activities"; // TODO ???
-            app_icon = "clock";
+            app_icon = "preferences-system-time";
             app_launcher = "activities.desktop";
 
             // TODO
@@ -115,7 +115,7 @@ namespace Activities {
         void createWindow() {
             window = new Gtk.Window();
             window.title = program_name;
-            window.icon_name = "clock";
+            window.icon_name = "preferences-system-time";
             window.set_size_request(700, 400);
             window.default_width = savedState.window_width;
             window.default_height = savedState.window_height;

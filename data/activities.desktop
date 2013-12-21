@@ -1,10 +1,10 @@
 [Desktop Entry]
-Name=Time Shift
-GenericName=Time Tracker
-Comment=Keep track of the time spent on tasks
+Name=Activities
+GenericName=Activity time tracker
+Comment=Keep track of the time spent on activities
 Categories=GTK;Utility;
 Exec=activities
-Icon=clock
+Icon=preferences-system-time
 Terminal=false
 Type=Application
 X-GNOME-Gettext-Domain=activities

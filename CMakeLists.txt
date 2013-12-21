@@ -3,7 +3,7 @@ project (activities)
 cmake_minimum_required (VERSION 2.6)
 
 set (EXEC_NAME "activities")
-set (RELEASE_NAME "A hello world.")
+set (RELEASE_NAME "Track activies and the time you spend.")
 set (VERSION "0.1")
 set (VERSION_INFO "Release")
 set (GETTEXT_PACKAGE "activities")
