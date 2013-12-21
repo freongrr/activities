@@ -1,11 +1,11 @@
 <schemalist>
-    <enum id="fabien.timeshift.savedstate.window-state">
+    <enum id="lp.fabien.cortina.activities.savedstate.window-state">
         <value nick="Normal" value="0" />
         <value nick="Maximized" value="1" />
         <value nick="Fullscreen" value="2" />
     </enum>
 
-    <schema path="/fabien/timeshift/saved-state/" id="fabien.timeshift.savedstate" gettext-domain="timeshift">
+    <schema path="/lp.fabien.cortina.activities/saved-state/" id="lp.fabien.cortina.activities.savedstate" gettext-domain="activities">
         <key name="window-width" type="i">
             <default>850</default>
             <summary>The saved width of the window.</summary>
@@ -16,7 +16,7 @@
             <summary>The saved height of the window.</summary>
             <description>The saved height of the window.</description>
         </key>
-        <key name="window-state" enum="fabien.timeshift.savedstate.window-state">
+        <key name="window-state" enum="lp.fabien.cortina.activities.savedstate.window-state">
             <default>"Normal"</default>
             <summary>The saved state of the window.</summary>
             <description>The saved state of the window.</description>

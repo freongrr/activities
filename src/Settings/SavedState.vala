@@ -1,6 +1,6 @@
 // Copyright Fabien Cortina <fabien.cortina@gmail.com>
 
-namespace TimeShift.Settings {
+namespace Activities.Settings {
 
     public enum WindowState {
         NORMAL = 0,
@@ -15,7 +15,7 @@ namespace TimeShift.Settings {
         public WindowState window_state { get; set; }
 
         public SavedState() {
-            base("fabien.timeshift.savedstate");
+            base("lp.fabien.cortina.activities.savedstate");
         }
     }
 }

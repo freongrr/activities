@@ -11,7 +11,7 @@
   with this program. If not, see 
 ***/
 
-namespace TimeShift.View {
+namespace Activities.View {
 
     public class AppToolbar : Gtk.HeaderBar {
 

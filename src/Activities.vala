@@ -11,7 +11,7 @@
   with this program. If not, see
 ***/
 
-namespace TimeShift {
+namespace Activities {
 
     namespace CommandLineOption {
         private static bool PRINT_VERSION = false;
@@ -21,9 +21,9 @@ namespace TimeShift {
 
     public static int main(string[] args) {
 
-        var context = new OptionContext("TimeShift");
+        var context = new OptionContext("Activities");
         context.set_help_enabled(true);
-        context.add_main_entries(command_line_options, "timeshift");
+        context.add_main_entries(command_line_options, "activities");
         context.add_group(Gtk.get_option_group(true));
 
         try {
@@ -33,7 +33,7 @@ namespace TimeShift {
         }
 
         if(CommandLineOption.PRINT_VERSION) {
-            stdout.printf("TimeShift %s\n", Build.VERSION);
+            stdout.printf("Activities %s\n", Build.VERSION);
             stdout.printf("Copyright 2013 Fabien Cortina.\n");
             return 0;
         }
@@ -57,13 +57,13 @@ namespace TimeShift {
             build_version = Build.VERSION;
             build_version_info = Build.VERSION_INFO;
 
-            program_name = "TimeShift";
-            exec_name = "timeshift";
+            program_name = "Activities";
+            exec_name = "activities";
 
             app_years = "2013-2014";
-            application_id = "fabien.timeshift"; // TODO ???
+            application_id = "lp.fabien.cortina.activities"; // TODO ???
             app_icon = "clock";
-            app_launcher = "timeshift.desktop";
+            app_launcher = "activities.desktop";
 
             // TODO
             main_url = "https://launchpad.net/~fabien.cortina";
