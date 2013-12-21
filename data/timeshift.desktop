@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Time Shift
+GenericName=Time Tracker
+Comment=Keep track of the time spent on tasks
+Categories=GTK;Utility;
+Exec=timeshift
+Icon=clock
+Terminal=false
+Type=Application
+X-GNOME-Gettext-Domain=timeshift
+X-GNOME-Keywords=time;work;
