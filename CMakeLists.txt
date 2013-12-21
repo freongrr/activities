@@ -33,11 +33,22 @@ add_definitions(-w) # Disable gcc warnings
 link_libraries(${DEPS_LIBRARIES})
 link_directories(${DEPS_LIBRARY_DIRS})
 
-# Some include paths
 include_directories(${CMAKE_BINARY_DIR}/src)
 
-# Subdirectories
-add_subdirectory (src)
+# Sources
+vala_precompile(VALA_C
+    src/TimeShift.vala
+    src/Settings/SavedState.vala
+    src/View/AppToolbar.vala
+    src/View/AppMenu.vala
+    src/config.vala
+PACKAGES
+    ${TIMESHIFT_DEPS}
+)
 
-# Data
+# Executable
+add_executable (timeshift ${VALA_C})
+
+# Installation
+install(TARGETS timeshift RUNTIME DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/timeshift.desktop DESTINATION share/applications)
