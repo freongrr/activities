@@ -144,6 +144,7 @@ namespace TimeShift {
         void createToolbar() {
             View.AppToolbar toolbar = new View.AppToolbar();
             toolbar.menu.about.activate.connect(() => show_about(window));
+            window.set_titlebar(toolbar);
         }
 
         void updateSavedState() {
