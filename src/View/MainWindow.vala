@@ -28,8 +28,46 @@ namespace Activities.View {
             this.icon_name = "preferences-system-time";
             this.set_size_request(700, 400);
 
-            // TODO : UI goes here
-            this.add(new Gtk.Label("Hello Again World!"));
+var library_category = new Granite.Widgets.SourceList.ExpandableItem ("Libraries");
+var store_category = new Granite.Widgets.SourceList.ExpandableItem ("Stores");
+var device_category = new Granite.Widgets.SourceList.ExpandableItem ("Devices");
+
+var music_item = new Granite.Widgets.SourceList.Item ("Music");
+
+// "Libraries" will be the parent category of "Music"
+library_category.add (music_item);
+
+// We plan to add sub-items to the store, so let's use an expandable item
+var my_store_item = new Granite.Widgets.SourceList.ExpandableItem ("My Store");
+store_category.add (my_store_item);
+
+var my_store_podcast_item = new Granite.Widgets.SourceList.Item ("Podcasts");
+var my_store_music_item = new Granite.Widgets.SourceList.Item ("Music");
+
+my_store_item.add (my_store_music_item);
+my_store_item.add (my_store_podcast_item);
+
+var player1_item = new Granite.Widgets.SourceList.Item ("Player 1");
+var player2_item = new Granite.Widgets.SourceList.Item ("Player 2");
+
+device_category.add (player1_item);
+device_category.add (player2_item);
+
+var source_list = new Granite.Widgets.SourceList ();
+
+
+var root = source_list.root;
+
+root.add (library_category);
+root.add (store_category);
+root.add (device_category);
+
+var pane = new Granite.Widgets.ThinPaned ();
+pane.pack1 (source_list, true, false);
+pane.pack2 (new Gtk.Label("Hello Again World!"), true, false);
+
+this.add(pane);
+
         }
     }
 }
