@@ -33,8 +33,9 @@ configure_file (${CMAKE_SOURCE_DIR}/src/config.vala.cmake ${CMAKE_SOURCE_DIR}/sr
 vala_precompile (VALA_C ${EXEC_NAME}
     src/Settings/SavedState.vala
     src/config.vala
-    src/Model/Source.vala
-    src/Model/SourceManager.vala
+    src/Model/Backend.vala
+    src/Model/Project.vala
+    src/Model/ProjectManager.vala
     src/View/AppToolbar.vala
     src/View/AppMenu.vala
     src/View/MainWindow.vala

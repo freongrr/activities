@@ -21,29 +21,27 @@
 
 namespace Activities.Model {
 
-    public interface Source : GLib.Object {
+    public class ProjectManager : GLib.Object {
 
-        /** Returns the type: "Local", "JIRA", etc */
-        public abstract string get_backend();
+        public Gee.HashSet<Project> projects { get; private set; }
 
-        /** Returns the name: "Work", "Personal", etc */
-        public abstract string get_name();
-    }
+        public signal void project_added(Project project);
+        public signal void project_removed(Project project);
 
-    public class DummySource : GLib.Object, Source {
+        public ProjectManager() {
+            this.projects = new Gee.HashSet<Project>();
+	}
 
-        public string name { get; set; }
-
-        public DummySource(string name) {
-            this.name = name;
+        public void add_project(Project project) {
+            if (this.projects.add(project)) {
+                this.project_added(project);
+            }
         }
 
-        public string get_backend() {
-            return "Dummy";
-        }
-
-        public string get_name() {
-            return name;
+        public void remove_project(Project project) {
+            if (this.projects.remove(project)) {
+                this.project_removed(project);
+            }
         }
     }
 }

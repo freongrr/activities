@@ -21,27 +21,26 @@
 
 namespace Activities.Model {
 
-    public class SourceManager : GLib.Object {
+    public interface Backend : GLib.Object {
 
-        public Gee.HashSet<Source> sources { get; private set; }
+        public abstract string get_uid();
 
-        public signal void source_added(Source source);
-        public signal void source_removed(Source source);
+        public abstract string get_localized_name();
 
-        public SourceManager() {
-            this.sources = new Gee.HashSet<Source>();
-	}
+        // TODO : methods to lookup remote activities
+    }
 
-        public void add_source(Source source) {
-            if (this.sources.add(source)) {
-                this.source_added(source);
-            }
+    public class DummyBackend : GLib.Object, Backend {
+
+        public DummyBackend() {
         }
 
-        public void remove_source(Source source) {
-            if (this.sources.remove(source)) {
-                this.source_removed(source);
-            }
+        public string get_uid() {
+            return "dummy";
+        }
+
+        public string get_localized_name() {
+            return "Dummy Backend";
         }
     }
 }

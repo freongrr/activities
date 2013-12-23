@@ -23,53 +23,55 @@ namespace Activities.View {
 
     public class MainWindow : Gtk.Window {
 
-        private Granite.Widgets.SourceList source_list;
+        private Granite.Widgets.SourceList project_list;
 
         public MainWindow(string title) {
             this.title = title;
             this.icon_name = "preferences-system-time";
             this.set_size_request(700, 400);
 
-            this.source_list = new Granite.Widgets.SourceList();
+            this.project_list = new Granite.Widgets.SourceList();
 
             var local_item = new Granite.Widgets.SourceList.ExpandableItem("Local");
             var trash_item = new Granite.Widgets.SourceList.Item ("Trash");
             local_item.add(trash_item);
-            this.source_list.root.add(local_item);
+            this.project_list.root.add(local_item);
 
             var split_panel = new Granite.Widgets.ThinPaned();
-            split_panel.pack1(source_list, true, false);
+            split_panel.pack1(project_list, true, false);
             split_panel.pack2(new Gtk.Label("Hello Again World!"), true, false);
             this.add(split_panel);
 
             // TODO : expand all by default
         }
 
-        public void add_source(Model.Source source) {
-            var parent_item = this.get_backend_parent_item(source);
+        public void add_project(Model.Project project) {
+            var parent_item = this.get_backend_parent_item(project);
 
             // TODO : icons
-            var source_item = new Granite.Widgets.SourceList.Item(source.get_name());
-            parent_item.add(source_item);
+            var project_item = new Granite.Widgets.SourceList.Item(project.get_localized_name());
+            parent_item.add(project_item);
         }
 
-        public void remove_source(Model.Source source) {
+        public void remove_project(Model.Project project) {
             // TODO
         }
 
-        private Granite.Widgets.SourceList.ExpandableItem get_backend_parent_item(Model.Source source) {
+        private Granite.Widgets.SourceList.ExpandableItem get_backend_parent_item(Model.Project project) {
             var children_copy = new Gee.ArrayList<Granite.Widgets.SourceList.Item>();
-            children_copy.add_all(this.source_list.root.children);
+            children_copy.add_all(this.project_list.root.children);
 
             foreach (var item in children_copy) {
-                if (item is Granite.Widgets.SourceList.ExpandableItem && item.name == source.get_backend()) {
-                    return (Granite.Widgets.SourceList.ExpandableItem) item;
+                if (item is Granite.Widgets.SourceList.ExpandableItem) {
+                    if (item.name == project.get_backend().get_localized_name()) {
+                        return (Granite.Widgets.SourceList.ExpandableItem) item;
+                    }
                 }
             }
 
             // TODO : icon
-            var parent_item = new Granite.Widgets.SourceList.ExpandableItem(source.get_backend());
-            this.source_list.root.add(parent_item);
+            var parent_item = new Granite.Widgets.SourceList.ExpandableItem(project.get_backend().get_localized_name());
+            this.project_list.root.add(parent_item);
             return parent_item;
         }
     }

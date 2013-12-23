@@ -52,7 +52,7 @@ namespace Activities {
         }
 
         private Settings.SavedState saved_state;
-        private Model.SourceManager source_manager;
+        private Model.ProjectManager project_manager;
         private View.MainWindow main_window;
 
         protected override void activate() {
@@ -62,7 +62,7 @@ namespace Activities {
             }
 
             this.saved_state = new Settings.SavedState();
-            this.source_manager = new Model.SourceManager();
+            this.project_manager = new Model.ProjectManager();
 
             create_main_window();
             create_toolbar();
@@ -70,8 +70,8 @@ namespace Activities {
             add_window(main_window);
             main_window.show_all();
 
-            this.source_manager.add_source(new Model.DummySource("foo"));
-            this.source_manager.add_source(new Model.DummySource("bla"));
+            this.project_manager.add_project(new Model.DummyProject("work", "Work"));
+            this.project_manager.add_project(new Model.DummyProject("person", "Personal"));
 
             Gtk.main();
         }
@@ -93,12 +93,12 @@ namespace Activities {
                 return false;
             });
 
-            this.source_manager.source_added.connect((s) => {
-                this.main_window.add_source(s);
+            this.project_manager.project_added.connect((s) => {
+                this.main_window.add_project(s);
             });
 
-            this.source_manager.source_added.connect((s) => {
-                this.main_window.remove_source(s);
+            this.project_manager.project_added.connect((p) => {
+                this.main_window.remove_project(p);
             });
 
             restore_state();
