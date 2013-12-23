@@ -52,6 +52,7 @@ namespace Activities {
         }
 
         private Settings.SavedState saved_state;
+        private Model.SourceManager source_manager;
         private View.MainWindow main_window;
 
         protected override void activate() {
@@ -61,6 +62,7 @@ namespace Activities {
             }
 
             this.saved_state = new Settings.SavedState();
+            this.source_manager = new Model.SourceManager();
 
             create_main_window();
             create_toolbar();
@@ -68,16 +70,19 @@ namespace Activities {
             add_window(main_window);
             main_window.show_all();
 
+            this.source_manager.add_source(new Model.DummySource("foo"));
+            this.source_manager.add_source(new Model.DummySource("bla"));
+
             Gtk.main();
         }
 
         private void create_main_window() {
-            main_window = new View.MainWindow(this.program_name);
-            main_window.destroy.connect((e) => { Gtk.main_quit(); });
-            main_window.delete_event.connect((e) => { update_saved_state(); return false; });
+            this.main_window = new View.MainWindow(this.program_name);
+            this.main_window.destroy.connect((e) => { Gtk.main_quit(); });
+            this.main_window.delete_event.connect((e) => { update_saved_state(); return false; });
 
             // TODO : is there no better way to register shortcuts???
-            main_window.key_press_event.connect((e) => {
+            this.main_window.key_press_event.connect((e) => {
                 switch (e.keyval) {
                     case Gdk.Key.@q:
                         if ((e.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
@@ -86,6 +91,14 @@ namespace Activities {
                         break;
                 }
                 return false;
+            });
+
+            this.source_manager.source_added.connect((s) => {
+                this.main_window.add_source(s);
+            });
+
+            this.source_manager.source_added.connect((s) => {
+                this.main_window.remove_source(s);
             });
 
             restore_state();

@@ -13,8 +13,10 @@ set (PKGDATADIR "${DATADIR}/activities")
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 add_definitions ("-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"")
 
+set (DEPENDENCIES gtk+-3.0 granite gee-1.0)
+
 find_package (PkgConfig)
-pkg_check_modules (DEPS REQUIRED gtk+-3.0 granite)
+pkg_check_modules (DEPS REQUIRED ${DEPENDENCIES})
 
 add_definitions (${DEPS_CFLAGS})
 link_libraries (${DEPS_LIBRARIES})
@@ -31,13 +33,15 @@ configure_file (${CMAKE_SOURCE_DIR}/src/config.vala.cmake ${CMAKE_SOURCE_DIR}/sr
 vala_precompile (VALA_C ${EXEC_NAME}
     src/Settings/SavedState.vala
     src/config.vala
+    src/Model/Source.vala
+    src/Model/SourceManager.vala
     src/View/AppToolbar.vala
     src/View/AppMenu.vala
     src/View/MainWindow.vala
     src/Activities.vala
 # tell what libraries to use when compiling
 PACKAGES
-    gtk+-3.0 granite
+    ${DEPENDENCIES}
 )
 
 add_executable (${EXEC_NAME} ${VALA_C})

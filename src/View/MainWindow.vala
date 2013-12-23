@@ -23,51 +23,54 @@ namespace Activities.View {
 
     public class MainWindow : Gtk.Window {
 
+        private Granite.Widgets.SourceList source_list;
+
         public MainWindow(string title) {
             this.title = title;
             this.icon_name = "preferences-system-time";
             this.set_size_request(700, 400);
 
-var library_category = new Granite.Widgets.SourceList.ExpandableItem ("Libraries");
-var store_category = new Granite.Widgets.SourceList.ExpandableItem ("Stores");
-var device_category = new Granite.Widgets.SourceList.ExpandableItem ("Devices");
+            this.source_list = new Granite.Widgets.SourceList();
 
-var music_item = new Granite.Widgets.SourceList.Item ("Music");
+            var local_item = new Granite.Widgets.SourceList.ExpandableItem("Local");
+            var trash_item = new Granite.Widgets.SourceList.Item ("Trash");
+            local_item.add(trash_item);
+            this.source_list.root.add(local_item);
 
-// "Libraries" will be the parent category of "Music"
-library_category.add (music_item);
+            var split_panel = new Granite.Widgets.ThinPaned();
+            split_panel.pack1(source_list, true, false);
+            split_panel.pack2(new Gtk.Label("Hello Again World!"), true, false);
+            this.add(split_panel);
 
-// We plan to add sub-items to the store, so let's use an expandable item
-var my_store_item = new Granite.Widgets.SourceList.ExpandableItem ("My Store");
-store_category.add (my_store_item);
+            // TODO : expand all by default
+        }
 
-var my_store_podcast_item = new Granite.Widgets.SourceList.Item ("Podcasts");
-var my_store_music_item = new Granite.Widgets.SourceList.Item ("Music");
+        public void add_source(Model.Source source) {
+            var parent_item = this.get_backend_parent_item(source);
 
-my_store_item.add (my_store_music_item);
-my_store_item.add (my_store_podcast_item);
+            // TODO : icons
+            var source_item = new Granite.Widgets.SourceList.Item(source.get_name());
+            parent_item.add(source_item);
+        }
 
-var player1_item = new Granite.Widgets.SourceList.Item ("Player 1");
-var player2_item = new Granite.Widgets.SourceList.Item ("Player 2");
+        public void remove_source(Model.Source source) {
+            // TODO
+        }
 
-device_category.add (player1_item);
-device_category.add (player2_item);
+        private Granite.Widgets.SourceList.ExpandableItem get_backend_parent_item(Model.Source source) {
+            var children_copy = new Gee.ArrayList<Granite.Widgets.SourceList.Item>();
+            children_copy.add_all(this.source_list.root.children);
 
-var source_list = new Granite.Widgets.SourceList ();
+            foreach (var item in children_copy) {
+                if (item is Granite.Widgets.SourceList.ExpandableItem && item.name == source.get_backend()) {
+                    return (Granite.Widgets.SourceList.ExpandableItem) item;
+                }
+            }
 
-
-var root = source_list.root;
-
-root.add (library_category);
-root.add (store_category);
-root.add (device_category);
-
-var pane = new Granite.Widgets.ThinPaned ();
-pane.pack1 (source_list, true, false);
-pane.pack2 (new Gtk.Label("Hello Again World!"), true, false);
-
-this.add(pane);
-
+            // TODO : icon
+            var parent_item = new Granite.Widgets.SourceList.ExpandableItem(source.get_backend());
+            this.source_list.root.add(parent_item);
+            return parent_item;
         }
     }
 }
