@@ -21,26 +21,15 @@
 
 namespace Activities.Model {
 
-    public interface Backend : GLib.Object {
+    public class Activity : GLib.Object {
 
-        public abstract string get_uid();
-
-        public abstract string get_localized_name();
-
-        // TODO : methods to lookup remote tasks
-    }
-
-    public class DummyBackend : GLib.Object, Backend {
-
-        public DummyBackend() {
-        }
-
-        public string get_uid() {
-            return "dummy";
-        }
-
-        public string get_localized_name() {
-            return "Dummy Backend";
-        }
+        // TODO : protected setters?
+        public string uid { get; set; }
+        public string task_uid { get; set; }
+        public string description { get; set; }
+        // TODO : what type for the date?
+        public int64 start_date { get; set; }
+        public int64? end_date { get; set; }
+        // TODO : tags
     }
 }

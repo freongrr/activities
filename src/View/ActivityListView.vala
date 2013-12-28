@@ -19,28 +19,27 @@
   END LICENSE
 ***/
 
-namespace Activities.Model {
+namespace Activities.View {
 
-    public interface Backend : GLib.Object {
+    public class ActivityListView : Gtk.TreeView {
 
-        public abstract string get_uid();
+        public ActivityListView(Model.ActivityListStore store) {
+            set_model(store);
 
-        public abstract string get_localized_name();
-
-        // TODO : methods to lookup remote tasks
-    }
-
-    public class DummyBackend : GLib.Object, Backend {
-
-        public DummyBackend() {
+            append_column(create_column());
         }
 
-        public string get_uid() {
-            return "dummy";
-        }
+        private static Gtk.TreeViewColumn create_column() {
+            //var renderer = new ActivityListCellRenderer();
+            var column = new Gtk.TreeViewColumn();
+            column.set_title("Activity");
+//            column.set_attributes(renderer, "activity_attribute", 0);
+            column.set_resizable(true);
+  
+//            column.set_sizing(Gtk.TreeViewColumnSizing.FIXED);
+//            column.set_fixed_width(200);
 
-        public string get_localized_name() {
-            return "Dummy Backend";
+            return column;
         }
     }
 }

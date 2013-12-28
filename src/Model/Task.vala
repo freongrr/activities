@@ -21,26 +21,13 @@
 
 namespace Activities.Model {
 
-    public interface Backend : GLib.Object {
+    public class Task : GLib.Object {
 
-        public abstract string get_uid();
+        public string uid { public get; set; }
+        public string description { public get; set; }
+        public bool closed { public get; set; }
 
-        public abstract string get_localized_name();
-
-        // TODO : methods to lookup remote tasks
-    }
-
-    public class DummyBackend : GLib.Object, Backend {
-
-        public DummyBackend() {
-        }
-
-        public string get_uid() {
-            return "dummy";
-        }
-
-        public string get_localized_name() {
-            return "Dummy Backend";
-        }
+        // TODO : icon (i.e. bug/feature request), priority
+        // TODO : should we refererenced the backend here?
     }
 }

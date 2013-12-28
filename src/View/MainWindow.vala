@@ -30,19 +30,44 @@ namespace Activities.View {
             this.icon_name = "preferences-system-time";
             this.set_size_request(700, 400);
 
+            // Projects
+
             this.project_list = new Granite.Widgets.SourceList();
 
             var local_item = new Granite.Widgets.SourceList.ExpandableItem("Local");
             var trash_item = new Granite.Widgets.SourceList.Item ("Trash");
             local_item.add(trash_item);
+
             this.project_list.root.add(local_item);
+
+            // TODO : expand the source list by default
+
+            // Activities
+
+            var activity_store = new Model.ActivityListStore();
+            var activity_view = new View.ActivityListView(activity_store);
+
+            var dummyActivity = new Model.Activity();
+            dummyActivity.uid = "activity1234";
+            dummyActivity.task_uid = "task1234";
+            dummyActivity.description = "Reading emails";
+            dummyActivity.start_date = 201312250900;
+            dummyActivity.end_date = 201312251200;
+
+            Gtk.TreeIter iter;
+            activity_store.append(out iter);
+            activity_store.set_value(iter, 0, dummyActivity);
+
+            // Layout
 
             var split_panel = new Granite.Widgets.ThinPaned();
             split_panel.pack1(project_list, true, false);
-            split_panel.pack2(new Gtk.Label("Hello Again World!"), true, false);
-            this.add(split_panel);
+            split_panel.pack2(activity_view, true, false);
 
-            // TODO : expand all by default
+            var split_split_panel = new Granite.Widgets.ThinPaned();
+            split_split_panel.pack1(split_panel, true, false);
+            split_split_panel.pack2(new Gtk.Label("Details go here"), true, false);
+            this.add(split_split_panel);
         }
 
         public void add_project(Model.Project project) {

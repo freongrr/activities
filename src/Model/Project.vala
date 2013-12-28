@@ -21,6 +21,8 @@
 
 namespace Activities.Model {
 
+    // TODO : this does not have to be an interface
+    //         it's the backend that's going to be different
     public interface Project : GLib.Object {
 
         public abstract string get_uid();
@@ -29,19 +31,21 @@ namespace Activities.Model {
 
         public abstract Backend get_backend();
 
-        // TODO : methods to return activity for this project
+        public abstract Gee.List<Activity> get_activities();
     }
 
     public class DummyProject : GLib.Object, Project {
 
         private string uid;
         private string localized_name;
+        private Gee.List<Activity> activities;
         private Backend backend;
 
         public DummyProject(string uid, string localized_name) {
             this.uid = uid;
             this.localized_name = localized_name;
             this.backend = new DummyBackend();
+            this.activities = new Gee.ArrayList<Activity>();
         }
 
         public string get_uid() {
@@ -54,6 +58,10 @@ namespace Activities.Model {
 
         public Backend get_backend() {
             return this.backend;
+        }
+
+        public Gee.List<Activity> get_activities() {
+            return this.activities;
         }
     }
 }

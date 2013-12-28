@@ -19,28 +19,20 @@
   END LICENSE
 ***/
 
-namespace Activities.Model {
+namespace Activities.View {
 
-    public interface Backend : GLib.Object {
+    public class ActivityListRendered : Gtk.CellRenderer {
 
-        public abstract string get_uid();
 
-        public abstract string get_localized_name();
-
-        // TODO : methods to lookup remote tasks
-    }
-
-    public class DummyBackend : GLib.Object, Backend {
-
-        public DummyBackend() {
+        public ActivityListRendered() {
         }
 
-        public string get_uid() {
-            return "dummy";
-        }
-
-        public string get_localized_name() {
-            return "Dummy Backend";
+        public override void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
+            Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
+// ???
+            if (data != null) {
+                data.render(ctx, widget, background_area, cell_area, flags, hover_selected);
+            }
         }
     }
 }

@@ -33,13 +33,18 @@ configure_file (${CMAKE_SOURCE_DIR}/src/config.vala.cmake ${CMAKE_SOURCE_DIR}/sr
 vala_precompile (VALA_C ${EXEC_NAME}
     src/Settings/SavedState.vala
     src/config.vala
-    src/Model/Backend.vala
     src/Model/Project.vala
+    src/Model/Backend.vala
+    src/Model/Task.vala
     src/Model/ProjectManager.vala
+    src/Model/ActivityListStore.vala
+    src/Model/Activity.vala
+    src/Activities.vala
     src/View/AppToolbar.vala
     src/View/AppMenu.vala
+    src/View/ActivityListView.vala
+#    src/View/ActivityListRenderer.vala
     src/View/MainWindow.vala
-    src/Activities.vala
 # tell what libraries to use when compiling
 PACKAGES
     ${DEPENDENCIES}

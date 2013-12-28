@@ -21,26 +21,12 @@
 
 namespace Activities.Model {
 
-    public interface Backend : GLib.Object {
+    public class ActivityListStore : Gtk.ListStore {
 
-        public abstract string get_uid();
-
-        public abstract string get_localized_name();
-
-        // TODO : methods to lookup remote tasks
-    }
-
-    public class DummyBackend : GLib.Object, Backend {
-
-        public DummyBackend() {
-        }
-
-        public string get_uid() {
-            return "dummy";
-        }
-
-        public string get_localized_name() {
-            return "Dummy Backend";
+        public ActivityListStore() {
+            set_column_types({typeof (Activity)});
+//            set_default_sort_func(sort_by_date);
+            set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
         }
     }
 }
