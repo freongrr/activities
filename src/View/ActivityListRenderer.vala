@@ -64,10 +64,15 @@ debug("I'm here");
             Pango.AttrList attributes = new Pango.AttrList();
             attributes.insert(this.get_attr_fg_color(widget, selected));
 
+            string text = "NULL";
+            if (this.activity != null && this.activity.task != null) {
+                text = this.activity.task.key + " - " + this.activity.task.description;
+            }
+
             Pango.Layout layout = widget.create_pango_layout(null);
             layout.set_attributes(attributes);
             layout.set_font_description(font);
-            layout.set_text("TODO : Task", -1);
+            layout.set_text(text, -1);
             layout.set_width((cell_area.width - MARGIN * 2) * Pango.SCALE);
             layout.set_ellipsize(Pango.EllipsizeMode.END);
 
@@ -88,10 +93,15 @@ debug("I'm here");
             Pango.AttrList attributes = new Pango.AttrList();
             attributes.insert(this.get_attr_fg_color(widget, selected));
 
+            string text = "NULL";
+            if (this.activity != null) {
+                text = this.activity.description;
+            }
+
             Pango.Layout layout = widget.create_pango_layout(null);
             layout.set_attributes(attributes);
             layout.set_font_description(font);
-            layout.set_text(this.activity.description, -1);
+            layout.set_text(text, -1);
             layout.set_width((cell_area.width - MARGIN * 2) * Pango.SCALE);
             layout.set_ellipsize(Pango.EllipsizeMode.END);
 

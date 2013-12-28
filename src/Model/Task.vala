@@ -23,11 +23,13 @@ namespace Activities.Model {
 
     public class Task : GLib.Object {
 
-        public string uid { public get; set; }
-        public string description { public get; set; }
-        public bool closed { public get; set; }
+        internal string uid { public get; set; }
+        internal string key { public get; set; }
+        internal string description { public get; set; }
+        internal bool closed { public get; set; }
 
         // TODO : icon (i.e. bug/feature request), priority
-        // TODO : should we refererenced the backend here?
+
+        internal Task() {}
     }
 }

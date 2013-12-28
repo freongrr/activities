@@ -24,6 +24,7 @@ namespace Activities.View {
     public class MainWindow : Gtk.Window {
 
         private Granite.Widgets.SourceList project_list;
+        private Model.ActivityListStore activity_store;
 
         public MainWindow(string title) {
             this.title = title;
@@ -44,35 +45,8 @@ namespace Activities.View {
 
             // Activities
 
-            var activity_store = new Model.ActivityListStore();
+            this.activity_store = new Model.ActivityListStore();
             var activity_view = new View.ActivityListView(activity_store);
-
-            var dummyActivity = new Model.Activity();
-            dummyActivity.uid = "activity1";
-            dummyActivity.task_uid = "task1";
-            dummyActivity.description = "Reading emails";
-            dummyActivity.start_date = 201312250900;
-            dummyActivity.end_date = 201312251200;
-
-            activity_store.add(dummyActivity);
-
-            dummyActivity = new Model.Activity();
-            dummyActivity.uid = "activity2";
-            dummyActivity.task_uid = "task2";
-            dummyActivity.description = "Work";
-            dummyActivity.start_date = 201312251300;
-            dummyActivity.end_date = 201312251730;
-
-            activity_store.add(dummyActivity);
-
-            dummyActivity = new Model.Activity();
-            dummyActivity.uid = "activity3";
-            dummyActivity.task_uid = "task2";
-            dummyActivity.description = "Work";
-            dummyActivity.start_date = 201312240914;
-            dummyActivity.end_date = 201312241700;
-
-            activity_store.add(dummyActivity);
 
             // Layout
 
@@ -92,6 +66,12 @@ namespace Activities.View {
             // TODO : icons
             var project_item = new Granite.Widgets.SourceList.Item(project.get_localized_name());
             parent_item.add(project_item);
+
+            // TODO : this is just a test. this should be done when the selection changes
+            activity_store.clear();
+            foreach (var activity in project.get_activities()) {
+                activity_store.add(activity);
+            }
         }
 
         public void remove_project(Model.Project project) {

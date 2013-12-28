@@ -23,13 +23,13 @@ namespace Activities.Model {
 
     public class Activity : GLib.Object {
 
-        // TODO : protected setters?
-        public string uid { get; set; }
-        public string task_uid { get; set; }
-        public string description { get; set; }
-        // TODO : what type for the date?
-        public int64 start_date { get; set; }
-        public int64? end_date { get; set; }
-        // TODO : tags
+        internal string uid { public get; set; }
+        internal string description { public get; set; }
+        internal Task task { public get; set; }
+        internal LocalDateTime start_date { public get; set; }
+        internal LocalDateTime? end_date { public get; set; }
+        // TODO : localized tags?
+
+        internal Activity() {}
     }
 }

@@ -22,7 +22,7 @@
 namespace Activities.Model {
 
     // TODO : this does not have to be an interface
-    //         it's the backend that's going to be different
+    //         maybe we should have a ActivitySource and TaskSource
     public interface Project : GLib.Object {
 
         public abstract string get_uid();
@@ -46,6 +46,45 @@ namespace Activities.Model {
             this.localized_name = localized_name;
             this.backend = new DummyBackend();
             this.activities = new Gee.ArrayList<Activity>();
+
+            var task1 = new Task();
+            task1.uid = "t1";
+            task1.key = "TK-01";
+            task1.description = "Reading email";
+            task1.closed = false;
+
+            var task2 = new Task();
+            task2.uid = "t2";
+            task2.key = "TK-08";
+            task2.description = "Work";
+            task2.closed = false;
+
+            var dummyActivity = new Model.Activity();
+            dummyActivity.uid = "a1";
+            dummyActivity.description = "";
+            dummyActivity.task = task1;
+            dummyActivity.start_date = new LocalDateTime(2013, 12, 25, 9, 0, 0);
+            dummyActivity.end_date = new LocalDateTime(2013, 12, 25, 12, 0, 0);
+
+            activities.add(dummyActivity);
+
+            dummyActivity = new Model.Activity();
+            dummyActivity.uid = "a2";
+            dummyActivity.description = "Work on project A";
+            dummyActivity.task = task2;
+            dummyActivity.start_date = new LocalDateTime(2013, 12, 25, 13, 0, 0);
+            dummyActivity.end_date = new LocalDateTime(2013, 12, 25, 17, 30, 0);
+
+            activities.add(dummyActivity);
+
+            dummyActivity = new Model.Activity();
+            dummyActivity.uid = "a3";
+            dummyActivity.description = "Bug fixing";
+            dummyActivity.task = task2;
+            dummyActivity.start_date = new LocalDateTime(2013, 12, 24, 8, 45, 0);
+            dummyActivity.end_date = new LocalDateTime(2013, 12, 24, 17, 15, 0);
+
+            activities.add(dummyActivity);
         }
 
         public string get_uid() {

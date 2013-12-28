@@ -37,6 +37,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Model/Backend.vala
     src/Model/Task.vala
     src/Model/ProjectManager.vala
+    src/Model/LocalDateTime.vala
     src/Model/ActivityListStore.vala
     src/Model/Activity.vala
     src/Activities.vala
