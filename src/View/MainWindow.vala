@@ -48,15 +48,31 @@ namespace Activities.View {
             var activity_view = new View.ActivityListView(activity_store);
 
             var dummyActivity = new Model.Activity();
-            dummyActivity.uid = "activity1234";
-            dummyActivity.task_uid = "task1234";
+            dummyActivity.uid = "activity1";
+            dummyActivity.task_uid = "task1";
             dummyActivity.description = "Reading emails";
             dummyActivity.start_date = 201312250900;
             dummyActivity.end_date = 201312251200;
 
-            Gtk.TreeIter iter;
-            activity_store.append(out iter);
-            activity_store.set_value(iter, 0, dummyActivity);
+            activity_store.add(dummyActivity);
+
+            dummyActivity = new Model.Activity();
+            dummyActivity.uid = "activity2";
+            dummyActivity.task_uid = "task2";
+            dummyActivity.description = "Work";
+            dummyActivity.start_date = 201312251300;
+            dummyActivity.end_date = 201312251730;
+
+            activity_store.add(dummyActivity);
+
+            dummyActivity = new Model.Activity();
+            dummyActivity.uid = "activity3";
+            dummyActivity.task_uid = "task2";
+            dummyActivity.description = "Work";
+            dummyActivity.start_date = 201312240914;
+            dummyActivity.end_date = 201312241700;
+
+            activity_store.add(dummyActivity);
 
             // Layout
 

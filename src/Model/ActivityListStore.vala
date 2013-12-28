@@ -28,5 +28,11 @@ namespace Activities.Model {
 //            set_default_sort_func(sort_by_date);
             set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
         }
+
+        public void add(Activity activity) {
+            Gtk.TreeIter iter;
+            this.append(out iter);
+            this.set_value(iter, 0, activity);
+        }
     }
 }

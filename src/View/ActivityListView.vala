@@ -30,11 +30,12 @@ namespace Activities.View {
         }
 
         private static Gtk.TreeViewColumn create_column() {
-            //var renderer = new ActivityListCellRenderer();
+            var renderer = new ActivityListRendered();
             var column = new Gtk.TreeViewColumn();
             column.set_title("Activity");
-//            column.set_attributes(renderer, "activity_attribute", 0);
-            column.set_resizable(true);
+            column.pack_start(renderer, true);
+            column.add_attribute(renderer, "activity", 0);
+            column.set_resizable(false);
   
 //            column.set_sizing(Gtk.TreeViewColumnSizing.FIXED);
 //            column.set_fixed_width(200);
