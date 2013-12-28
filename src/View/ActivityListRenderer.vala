@@ -23,7 +23,8 @@ namespace Activities.View {
 
     public class ActivityListRendered : Gtk.CellRenderer {
 
-        private const int MARGIN = 5;
+        private const int MARGIN = 4;
+        private const int LINE_SPACING = 5;
         private const int FONT_SIZE_TASK = 10;
         private const int FONT_SIZE_TIME = 10;
         private const int FONT_SIZE_DESCRIPTION = 9;
@@ -38,10 +39,11 @@ namespace Activities.View {
             out int y_offset, out int width, out int height) {
             x_offset = 0;
             y_offset = 0;
-            width = 50;
+            width = 100;
             height = 50;
         }
 
+        // TODO : is this thread safe? I don't like passing so many arguments around...
         public override void render(Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle background_area, 
             Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
 debug("I'm here");
@@ -49,10 +51,39 @@ debug("I'm here");
             bool selected = (flags & Gtk.CellRendererState.SELECTED) != 0;
             int top = cell_area.y + MARGIN;
 
+            top = this.render_task(top, selected, context, widget, cell_area);
+            top = this.render_description(top, selected, context, widget, cell_area);
+            this.draw_separator(context, cell_area);
+        }
+
+        private int render_task(int top, bool selected, Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle cell_area) {
             Pango.FontDescription font = new Pango.FontDescription();
             font.set_size(FONT_SIZE_TASK * Pango.SCALE);
-            // TODO : bold, or different color if still active?
-            // font.set_weight(Pango.Weight.BOLD);
+            font.set_weight(Pango.Weight.BOLD);
+
+            Pango.AttrList attributes = new Pango.AttrList();
+            attributes.insert(this.get_attr_fg_color(widget, selected));
+
+            Pango.Layout layout = widget.create_pango_layout(null);
+            layout.set_attributes(attributes);
+            layout.set_font_description(font);
+            layout.set_text("TODO : Task", -1);
+            layout.set_width((cell_area.width - MARGIN * 2) * Pango.SCALE);
+            layout.set_ellipsize(Pango.EllipsizeMode.END);
+
+            context.move_to(cell_area.x + MARGIN, top);
+            Pango.cairo_show_layout(context, layout);
+
+            Pango.Rectangle? ink_rectangle;
+            Pango.Rectangle? logical_rectangle;
+            layout.get_pixel_extents(out ink_rectangle, out logical_rectangle);
+
+            return top + ink_rectangle.y + ink_rectangle.height + LINE_SPACING;
+        }
+
+        private int render_description(int top, bool selected, Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle cell_area) {
+            Pango.FontDescription font = new Pango.FontDescription();
+            font.set_size(FONT_SIZE_DESCRIPTION * Pango.SCALE);
 
             Pango.AttrList attributes = new Pango.AttrList();
             attributes.insert(this.get_attr_fg_color(widget, selected));
@@ -64,10 +95,23 @@ debug("I'm here");
             layout.set_width((cell_area.width - MARGIN * 2) * Pango.SCALE);
             layout.set_ellipsize(Pango.EllipsizeMode.END);
 
-            if (context != null) {
-                context.move_to(cell_area.x + MARGIN, top);
-                Pango.cairo_show_layout(context, layout);
-            }
+            context.move_to(cell_area.x + MARGIN, top);
+            Pango.cairo_show_layout(context, layout);
+
+            Pango.Rectangle? ink_rectangle;
+            Pango.Rectangle? logical_rectangle;
+            layout.get_pixel_extents(out ink_rectangle, out logical_rectangle);
+
+            return top + ink_rectangle.y + ink_rectangle.height + LINE_SPACING;
+        }
+
+        private void draw_separator(Cairo.Context context, Gdk.Rectangle cell_area) {
+            // TODO : way too many magic numbers here
+            context.set_line_width(1);
+     	    context.set_source_rgb(0.1, 0.1, 0.1);
+            context.move_to(cell_area.x - 3, cell_area.y + cell_area.height + 3);
+            context.line_to(cell_area.x + cell_area.width + 3	, cell_area.y + cell_area.height + 3);
+            context.stroke();
         }
 
         private Pango.Attribute get_attr_fg_color(Gtk.Widget widget, bool selected) {

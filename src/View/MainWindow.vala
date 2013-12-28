@@ -77,12 +77,12 @@ namespace Activities.View {
             // Layout
 
             var split_panel = new Granite.Widgets.ThinPaned();
-            split_panel.pack1(project_list, true, false);
-            split_panel.pack2(activity_view, true, false);
+            split_panel.pack1(activity_view, true, false);
+            split_panel.pack2(new Gtk.Label("Details go here"), true, false);
 
             var split_split_panel = new Granite.Widgets.ThinPaned();
-            split_split_panel.pack1(split_panel, true, false);
-            split_split_panel.pack2(new Gtk.Label("Details go here"), true, false);
+            split_split_panel.pack1(project_list, true, false);
+            split_split_panel.pack2(split_panel, true, false);
             this.add(split_split_panel);
         }
 
