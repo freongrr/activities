@@ -34,6 +34,7 @@ namespace Activities.View {
             // Projects
 
             this.project_list = new Granite.Widgets.SourceList();
+            this.project_list.set_size_request(150, -1);
 
             var local_item = new Granite.Widgets.SourceList.ExpandableItem("Local");
             var trash_item = new Granite.Widgets.SourceList.Item ("Trash");
@@ -47,16 +48,17 @@ namespace Activities.View {
 
             this.activity_store = new Model.ActivityListStore();
             var activity_view = new View.ActivityListView(activity_store);
+            activity_view.set_size_request(200, -1);
 
             // Layout
 
             var split_panel = new Granite.Widgets.ThinPaned();
-            split_panel.pack1(activity_view, true, false);
+            split_panel.pack1(activity_view, false, true);
             split_panel.pack2(new Gtk.Label("Details go here"), true, false);
 
             var split_split_panel = new Granite.Widgets.ThinPaned();
-            split_split_panel.pack1(project_list, true, false);
-            split_split_panel.pack2(split_panel, true, false);
+            split_split_panel.pack1(project_list, false, true);
+            split_split_panel.pack2(split_panel, true, true);
             this.add(split_split_panel);
         }
 

@@ -43,91 +43,155 @@ namespace Activities.View {
             height = 50;
         }
 
-        // TODO : is this thread safe? I don't like passing so many arguments around...
         public override void render(Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle background_area, 
             Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
-debug("I'm here");
 
-            bool selected = (flags & Gtk.CellRendererState.SELECTED) != 0;
-            int top = cell_area.y + MARGIN;
+            var render_context = new RenderContext(context, widget, cell_area, flags);
+            render_context.render(this.activity);
+        }
+    }
 
-            top = this.render_task(top, selected, context, widget, cell_area);
-            top = this.render_description(top, selected, context, widget, cell_area);
-            this.draw_separator(context, cell_area);
+    internal class RenderContext {
+
+        private const int MARGIN = 4;
+        private const int LINE_SPACING = 5;
+        private const int FONT_SIZE_TASK = 10;
+        private const int FONT_SIZE_TIME = 10;
+        private const int FONT_SIZE_DESCRIPTION = 9;
+
+        private Cairo.Context context;
+        private Gtk.Widget widget;
+        private Gdk.Rectangle cell_area;
+        private Gtk.CellRendererState flags;
+        private bool selected;
+
+        private int top;
+        private int time_width;
+
+        internal RenderContext(Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
+            this.context = context;
+            this.widget = widget;
+            this.cell_area = cell_area;
+            this.flags = flags;
+
+            this.selected = (flags & Gtk.CellRendererState.SELECTED) != 0;
+            this.top = cell_area.y + MARGIN;
         }
 
-        private int render_task(int top, bool selected, Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle cell_area) {
+        internal void render(Model.Activity activity) {
+            this.render_time(activity);
+            this.render_task(activity);
+            this.render_description(activity);
+            this.draw_separator();
+        }
+
+        private void render_time(Model.Activity activity) {
+            string text = "NULL";
+            if (activity != null && activity.task != null) {
+                if (activity.end_date != null) {
+                    // TODO : show the duration instead?
+                    text = activity.start_date.to_short_time_string() +
+                           " - " + activity.end_date.to_short_time_string();
+                } else {
+                    text = activity.start_date.to_short_time_string() + " - now";
+                }
+            }
+
+            Pango.FontDescription font = new Pango.FontDescription();
+            font.set_size(FONT_SIZE_TIME * Pango.SCALE);
+            font.set_weight(Pango.Weight.BOLD);
+
+            Pango.AttrList attributes = new Pango.AttrList();
+            attributes.insert(this.get_attr_fg_color());
+
+            Pango.Layout layout = this.widget.create_pango_layout(null);
+            layout.set_attributes(attributes);
+            layout.set_font_description(font);
+            layout.set_text(text, -1);
+            layout.set_ellipsize(Pango.EllipsizeMode.END);
+
+            Pango.Rectangle? ink_rectangle;
+            Pango.Rectangle? logical_rectangle;
+            layout.get_pixel_extents(out ink_rectangle, out logical_rectangle);
+
+            this.time_width = ink_rectangle.width;
+
+            this.context.move_to(this.cell_area.x + this.cell_area.width - ink_rectangle.width, this.top);
+            Pango.cairo_show_layout(this.context, layout);
+        }
+
+        private void render_task(Model.Activity activity) {
+            string text = "NULL";
+            if (activity != null && activity.task != null) {
+                text = activity.task.key + " - " + activity.task.description;
+            }
+
             Pango.FontDescription font = new Pango.FontDescription();
             font.set_size(FONT_SIZE_TASK * Pango.SCALE);
             font.set_weight(Pango.Weight.BOLD);
 
             Pango.AttrList attributes = new Pango.AttrList();
-            attributes.insert(this.get_attr_fg_color(widget, selected));
+            attributes.insert(this.get_attr_fg_color());
 
-            string text = "NULL";
-            if (this.activity != null && this.activity.task != null) {
-                text = this.activity.task.key + " - " + this.activity.task.description;
-            }
-
-            Pango.Layout layout = widget.create_pango_layout(null);
+            Pango.Layout layout = this.widget.create_pango_layout(null);
             layout.set_attributes(attributes);
             layout.set_font_description(font);
             layout.set_text(text, -1);
-            layout.set_width((cell_area.width - MARGIN * 2) * Pango.SCALE);
+            layout.set_width((this.cell_area.width - this.time_width - MARGIN * 2) * Pango.SCALE);
             layout.set_ellipsize(Pango.EllipsizeMode.END);
 
-            context.move_to(cell_area.x + MARGIN, top);
-            Pango.cairo_show_layout(context, layout);
+            context.move_to(this.cell_area.x + MARGIN, this.top);
+            Pango.cairo_show_layout(this.context, layout);
 
             Pango.Rectangle? ink_rectangle;
             Pango.Rectangle? logical_rectangle;
             layout.get_pixel_extents(out ink_rectangle, out logical_rectangle);
 
-            return top + ink_rectangle.y + ink_rectangle.height + LINE_SPACING;
+            this.top += ink_rectangle.y + ink_rectangle.height + LINE_SPACING;
         }
 
-        private int render_description(int top, bool selected, Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle cell_area) {
+        private void render_description(Model.Activity activity) {
+            string text = "NULL";
+            if (activity != null) {
+                text = activity.description;
+            }
+
             Pango.FontDescription font = new Pango.FontDescription();
             font.set_size(FONT_SIZE_DESCRIPTION * Pango.SCALE);
 
             Pango.AttrList attributes = new Pango.AttrList();
-            attributes.insert(this.get_attr_fg_color(widget, selected));
+            attributes.insert(this.get_attr_fg_color());
 
-            string text = "NULL";
-            if (this.activity != null) {
-                text = this.activity.description;
-            }
-
-            Pango.Layout layout = widget.create_pango_layout(null);
+            Pango.Layout layout = this.widget.create_pango_layout(null);
             layout.set_attributes(attributes);
             layout.set_font_description(font);
             layout.set_text(text, -1);
-            layout.set_width((cell_area.width - MARGIN * 2) * Pango.SCALE);
+            layout.set_width((this.cell_area.width - MARGIN * 2) * Pango.SCALE);
             layout.set_ellipsize(Pango.EllipsizeMode.END);
 
-            context.move_to(cell_area.x + MARGIN, top);
-            Pango.cairo_show_layout(context, layout);
+            context.move_to(this.cell_area.x + MARGIN, this.top);
+            Pango.cairo_show_layout(this.context, layout);
 
             Pango.Rectangle? ink_rectangle;
             Pango.Rectangle? logical_rectangle;
             layout.get_pixel_extents(out ink_rectangle, out logical_rectangle);
 
-            return top + ink_rectangle.y + ink_rectangle.height + LINE_SPACING;
+            this.top += ink_rectangle.y + ink_rectangle.height + LINE_SPACING;
         }
 
-        private void draw_separator(Cairo.Context context, Gdk.Rectangle cell_area) {
+        private void draw_separator() {
             // TODO : way too many magic numbers here
-            context.set_line_width(1);
-     	    context.set_source_rgb(0.1, 0.1, 0.1);
-            context.move_to(cell_area.x - 3, cell_area.y + cell_area.height + 3);
-            context.line_to(cell_area.x + cell_area.width + 3	, cell_area.y + cell_area.height + 3);
-            context.stroke();
+            this.context.set_line_width(1);
+     	    this.context.set_source_rgb(0.1, 0.1, 0.1);
+            this.context.move_to(this.cell_area.x - 3, this.cell_area.y + this.cell_area.height + 3);
+            this.context.line_to(this.cell_area.x + this.cell_area.width + 3, this.cell_area.y + this.cell_area.height + 3);
+            this.context.stroke();
         }
 
-        private Pango.Attribute get_attr_fg_color(Gtk.Widget widget, bool selected) {
-            if (selected) {
+        private Pango.Attribute get_attr_fg_color() {
+            if (this.selected) {
                 Gdk.RGBA def = { 0.33, 0.33, 0.33, 0.1 };
-                return get_pango_foreground_attr(widget.get_style_context(), "selected_fg_color", def);
+                return this.get_pango_foreground_attr(this.widget.get_style_context(), "selected_fg_color", def);
             } else {
                 return Pango.attr_foreground_new(0x57, 0x57, 0x57);
             }

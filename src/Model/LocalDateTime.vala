@@ -39,6 +39,10 @@ namespace Activities.Model {
             this.seconds = seconds;
         }
 
+        public string to_short_time_string() {
+            return "%d:%02d".printf(hours, minutes);
+        }
+
         public string to_ISO_8601_string() {
             return "%04d-%02d-%02dT%02d:%02d:%02d".printf(year, month, day, hours, minutes, seconds);
         }
