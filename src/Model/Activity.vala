@@ -23,12 +23,13 @@ namespace Activities.Model {
 
     public class Activity : GLib.Object {
 
-        internal string uid { public get; set; }
+        internal string local_id { public get; set; }
+        internal string remote_id { public get; set; }
         internal string description { public get; set; }
         internal Task task { public get; set; }
         internal LocalDateTime start_date { public get; set; }
         internal LocalDateTime? end_date { public get; set; }
-        // TODO : localized tags?
+        internal Gee.Set<string> tags { public get; set; }
 
         internal Activity() {}
     }

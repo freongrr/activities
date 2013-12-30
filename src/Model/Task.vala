@@ -23,7 +23,8 @@ namespace Activities.Model {
 
     public class Task : GLib.Object {
 
-        internal string uid { public get; set; }
+        internal string local_id { public get; set; }
+        internal string remote_id { public get; set; }
         internal string key { public get; set; }
         internal string description { public get; set; }
         internal bool closed { public get; set; }

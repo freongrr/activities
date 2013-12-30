@@ -30,7 +30,7 @@ namespace Activities.Model {
 
         public ProjectManager() {
             this.projects = new Gee.HashSet<Project>();
-	}
+        }
 
         public void add_project(Project project) {
             if (this.projects.add(project)) {

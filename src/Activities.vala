@@ -70,8 +70,9 @@ namespace Activities {
             add_window(main_window);
             main_window.show_all();
 
-            this.project_manager.add_project(new Model.DummyProject("work", "Work"));
-            this.project_manager.add_project(new Model.DummyProject("person", "Personal"));
+            var dummy_projects = new Model.DummyProjects();
+            this.project_manager.add_project(dummy_projects.work_project);
+            this.project_manager.add_project(dummy_projects.personal_project);
 
             Gtk.main();
         }

@@ -23,24 +23,18 @@ namespace Activities.Model {
 
     public interface Backend : GLib.Object {
 
-        public abstract string get_uid();
+        public abstract string get_id();
 
-        public abstract string get_localized_name();
+        public abstract string get_name();
 
-        // TODO : methods to lookup remote tasks
-    }
+        public abstract string get_icon_name();
 
-    public class DummyBackend : GLib.Object, Backend {
+        public abstract Gee.Collection<Activity> get_activities(int days);
 
-        public DummyBackend() {
-        }
+        public abstract Gee.Collection<Task> get_tasks(string query);
 
-        public string get_uid() {
-            return "dummy";
-        }
+        public abstract void export_artivity(Activity activity);
 
-        public string get_localized_name() {
-            return "Dummy Backend";
-        }
+        // TODO : events when new activities are loaded?
     }
 }

@@ -34,7 +34,7 @@ namespace Activities.View {
             // Projects
 
             this.project_list = new Granite.Widgets.SourceList();
-            this.project_list.set_size_request(150, -1);
+            this.project_list.set_size_request(100, -1);
 
             var local_item = new Granite.Widgets.SourceList.ExpandableItem("Local");
             var trash_item = new Granite.Widgets.SourceList.Item ("Trash");
@@ -48,7 +48,7 @@ namespace Activities.View {
 
             this.activity_store = new Model.ActivityListStore();
             var activity_view = new View.ActivityListView(activity_store);
-            activity_view.set_size_request(200, -1);
+            activity_view.set_size_request(150, -1);
 
             // Layout
 
@@ -66,12 +66,12 @@ namespace Activities.View {
             var parent_item = this.get_backend_parent_item(project);
 
             // TODO : icons
-            var project_item = new Granite.Widgets.SourceList.Item(project.get_localized_name());
+            var project_item = new Granite.Widgets.SourceList.Item(project.name);
             parent_item.add(project_item);
 
+            stdout.printf("Activities in project %s: %d\n", project.name, project.activities.size);
             // TODO : this is just a test. this should be done when the selection changes
-            activity_store.clear();
-            foreach (var activity in project.get_activities()) {
+            foreach (var activity in project.activities) {
                 activity_store.add(activity);
             }
         }
@@ -86,14 +86,14 @@ namespace Activities.View {
 
             foreach (var item in children_copy) {
                 if (item is Granite.Widgets.SourceList.ExpandableItem) {
-                    if (item.name == project.get_backend().get_localized_name()) {
+                    if (item.name == project.backend.get_name()) {
                         return (Granite.Widgets.SourceList.ExpandableItem) item;
                     }
                 }
             }
 
             // TODO : icon
-            var parent_item = new Granite.Widgets.SourceList.ExpandableItem(project.get_backend().get_localized_name());
+            var parent_item = new Granite.Widgets.SourceList.ExpandableItem(project.backend.get_name());
             this.project_list.root.add(parent_item);
             return parent_item;
         }
