@@ -27,6 +27,10 @@ include (ValaVersion)
 include (ValaPrecompile)
 ensure_vala_version ("0.16" MINIMUM)
 
+SET(VALA_COMPILE_FLAGS "--enable-experimental-non-null")
+#SET(VALA_COMPILE_FLAGS --enable-checking --fatal-warnings)
+#SET(VALA_COMPILE_FLAGS_DEBUG -X -ggdb3)
+
 configure_file (${CMAKE_SOURCE_DIR}/src/config.vala.cmake ${CMAKE_SOURCE_DIR}/src/config.vala)
 
 # files we want to compile
@@ -47,6 +51,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/View/ActivityListView.vala
     src/View/AppMenu.vala
     src/View/AppToolbar.vala
+    src/View/DateTimePicker.vala
     src/View/MainWindow.vala
 # tell what libraries to use when compiling
 PACKAGES
