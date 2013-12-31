@@ -23,15 +23,11 @@ namespace Activities.View {
 
     internal class ActivityDetailView : Gtk.Box {
 
-        private const string DATE_FORMAT = (_("%B %e, %Y"));
-
         private Gtk.Entry task_entry;
         private Gtk.Entry description_entry;
         private Gtk.Entry tags_entry;
-        private Granite.Widgets.DatePicker start_date_picker;
-        private Granite.Widgets.TimePicker start_time_picker;
-        private Granite.Widgets.DatePicker end_date_picker;
-        private Granite.Widgets.TimePicker end_time_picker;
+        private DateTimePicker start_picker;
+        private DateTimePicker end_picker;
         private Gtk.TextView notes_text_view;
 
         internal ActivityDetailView() {
@@ -41,17 +37,11 @@ namespace Activities.View {
             this.description_entry = new Gtk.Entry();
             this.description_entry.changed.connect(this.on_changed);
 
-            this.start_date_picker = new Granite.Widgets.DatePicker.with_format(DATE_FORMAT);
-            this.start_date_picker.changed.connect(this.on_changed);
+            this.start_picker = new DateTimePicker();
+            this.start_picker.date_time_changed.connect(this.on_changed);
 
-            this.start_time_picker = new Granite.Widgets.TimePicker();
-            this.start_time_picker.time_changed.connect(this.on_changed);
-
-            this.end_date_picker = new Granite.Widgets.DatePicker.with_format(DATE_FORMAT);
-            this.end_date_picker.changed.connect(this.on_changed);
-
-            this.end_time_picker = new Granite.Widgets.TimePicker();
-            this.end_time_picker.time_changed.connect(this.on_changed);
+            this.end_picker = new DateTimePicker();
+            this.end_picker.date_time_changed.connect(this.on_changed);
 
             this.tags_entry = new Gtk.Entry();
             this.tags_entry.changed.connect(this.on_changed);
@@ -70,9 +60,9 @@ namespace Activities.View {
             this.pack_start(this.create_label("Task"), false, false, 0);
             this.pack_start(this.task_entry, false, false, 0);
             this.pack_start(this.create_label("Start"), false, false, 0);
-            this.pack_start(this.create_start_date_row(), false, false, 0);
+            this.pack_start(this.start_picker, false, false, 0);
             this.pack_start(this.create_label("End"), false, false, 0);
-            this.pack_start(this.create_end_date_row(), false, false, 0);
+            this.pack_start(this.end_picker, false, false, 0);
             this.pack_start(this.create_label("Description"), false, false, 0);
             this.pack_start(this.description_entry, false, false, 0);
             this.pack_start(this.create_label("Tags"), false, false, 0);
@@ -85,20 +75,6 @@ namespace Activities.View {
             var label = new Gtk.Label(text);
             label.xalign = 0;
             return label;
-        }
-
-        private Gtk.Widget create_start_date_row() {
-            var h_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
-            h_box.pack_start(this.start_date_picker, false, false, 0);
-            h_box.pack_start(this.start_time_picker, false, false, 0);
-            return h_box;
-        }
-
-        private Gtk.Widget create_end_date_row() {
-            var h_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
-            h_box.pack_start(this.end_date_picker, false, false, 0);
-            h_box.pack_start(this.end_time_picker, false, false, 0);
-            return h_box;
         }
 
         private Gtk.Widget create_frame(Gtk.Widget widget) {
@@ -117,6 +93,14 @@ namespace Activities.View {
 
         private void on_changed() {
             // TODO
+            stdout.printf(
+                "Activity changed:\nTask: %s\nDescription: %s\nTags: %s\nStart: %s\nEnd: %s\nNotes: %s\n",
+                this.task_entry.text,
+                this.description_entry.text,
+                this.tags_entry.text,
+                this.start_picker.date_time.to_string(),
+                this.end_picker.date_time.to_string(),
+                this.notes_text_view.buffer.text);
         }
     }
 }
