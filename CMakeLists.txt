@@ -42,6 +42,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Model/Project.vala
     src/Model/Task.vala
     src/Settings/SavedState.vala
+    src/View/ActivityDetailView.vala
     src/View/ActivityListRenderer.vala
     src/View/ActivityListView.vala
     src/View/AppMenu.vala
