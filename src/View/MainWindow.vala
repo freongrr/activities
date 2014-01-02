@@ -51,6 +51,16 @@ namespace Activities.View {
             var activity_view = new View.ActivityListView(activity_store);
             activity_view.set_size_request(200, -1);
 
+activity_view.get_selection().changed.connect(() => {
+    Gtk.TreeModel model;
+    Gtk.TreeIter iter;
+    if (activity_view.get_selection().get_selected(out model, out iter)) {
+        GLib.Value v;
+        this.activity_store.get_value(iter, 0, out v);
+        this.detail_view.activity = (Model.Activity) v;
+    }
+});
+
             // Details
             this.detail_view = new ActivityDetailView();
 

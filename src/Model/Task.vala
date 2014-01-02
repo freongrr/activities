@@ -27,6 +27,7 @@ namespace Activities.Model {
         internal string remote_id { public get; set; }
         internal string key { public get; set; }
         internal string description { public get; set; }
+        internal string notes { public get; set; default = ""; }
         internal bool closed { public get; set; }
 
         // TODO : icon (i.e. bug/feature request), priority

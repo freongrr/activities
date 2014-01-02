@@ -23,12 +23,25 @@ namespace Activities.View {
 
     internal class ActivityDetailView : Gtk.Box {
 
+        public Model.Activity activity {
+            get {
+                return this._activity;
+            }
+
+            set {
+                this._activity = value;
+                update_view();
+            }
+        }
+
         private Gtk.Entry task_entry;
         private Gtk.Entry description_entry;
         private Gtk.Entry tags_entry;
         private DateTimePicker start_picker;
         private DateTimePicker end_picker;
         private Gtk.TextView notes_text_view;
+
+        private Model.Activity _activity;
 
         internal ActivityDetailView() {
             this.task_entry = new Gtk.Entry();
@@ -70,7 +83,7 @@ namespace Activities.View {
             this.pack_start(this.create_label("Notes"), false, false, 0);
             this.pack_start(this.create_frame(this.notes_text_view), true, true, 0);
         }
- 
+
         private Gtk.Label create_label(string text) {
             var label = new Gtk.Label(text);
             label.xalign = 0;
@@ -101,6 +114,25 @@ namespace Activities.View {
                 this.start_picker.date_time.to_string(),
                 this.end_picker.date_time.to_string(),
                 this.notes_text_view.buffer.text);
+        }
+
+        private void update_view() {
+            this.task_entry.text = this._activity.task.key + " - " + this._activity.task.description;
+            this.description_entry.text = this._activity.description;
+            this.tags_entry.text = this.get_tags_as_string();
+            this.start_picker.date_time = this._activity.start_date;
+            this.end_picker.date_time = this._activity.end_date;
+            this.notes_text_view.buffer.text = this._activity.task.notes;
+        }
+
+        private string get_tags_as_string() {
+            StringBuilder builder = new StringBuilder();
+            foreach (var tag in this._activity.tags) {
+                if (builder.len > 0)
+                    builder.append(", ");
+                builder.append(tag);
+            }
+            return builder.str;
         }
     }
 }

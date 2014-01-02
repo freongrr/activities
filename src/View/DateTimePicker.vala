@@ -25,10 +25,21 @@ namespace Activities.View {
 
         public signal void date_time_changed(GLib.DateTime date_time);
 
-        public GLib.DateTime date_time { get; private set; }
-
         private Granite.Widgets.DatePicker date_picker;
         private Granite.Widgets.TimePicker time_picker;
+
+        private GLib.DateTime _date_time;
+
+        public GLib.DateTime date_time {
+            get {
+                return this._date_time;
+            }
+            set {
+                // TODO : clone?
+                this._date_time = value;
+                refresh_view();
+            }
+        }
 
         internal DateTimePicker() {
             this.with_format((_("%B %e, %Y")));
@@ -57,10 +68,15 @@ namespace Activities.View {
             var date = date_picker.date;
             var time = time_picker.time;
 
-            this.date_time = new GLib.DateTime.local(
+            this._date_time = new GLib.DateTime.local(
                 date.get_year(), date.get_month(), date.get_day_of_month(),
                 time.get_hour(), time.get_minute(), 0);
-            date_time_changed(this.date_time);
+            date_time_changed(this._date_time);
+        }
+
+        private void refresh_view() {
+            this.date_picker.date = this._date_time;
+            this.time_picker.time = this._date_time;
         }
     }
 }

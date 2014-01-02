@@ -35,7 +35,7 @@ namespace Activities.View {
         public ActivityListRendered() {
         }
 
-        public override void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset, 
+        public override void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset,
             out int y_offset, out int width, out int height) {
             x_offset = 0;
             y_offset = 0;
@@ -43,7 +43,7 @@ namespace Activities.View {
             height = 50;
         }
 
-        public override void render(Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle background_area, 
+        public override void render(Cairo.Context context, Gtk.Widget widget, Gdk.Rectangle background_area,
             Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
 
             var render_context = new RenderContext(context, widget, cell_area, flags);
@@ -90,10 +90,10 @@ namespace Activities.View {
             if (activity != null && activity.task != null) {
                 if (activity.end_date != null) {
                     // TODO : show the duration instead?
-                    text = activity.start_date.to_short_time_string() +
-                           " - " + activity.end_date.to_short_time_string();
+                    text = this.to_short_time_string(activity.start_date) +
+                           " - " + this.to_short_time_string(activity.end_date);
                 } else {
-                    text = activity.start_date.to_short_time_string() + " - now";
+                    text = this.to_short_time_string(activity.start_date) + " - now";
                 }
             }
 
@@ -118,6 +118,10 @@ namespace Activities.View {
 
             this.context.move_to(this.cell_area.x + this.cell_area.width - ink_rectangle.width, this.top);
             Pango.cairo_show_layout(this.context, layout);
+        }
+
+        private string to_short_time_string(GLib.DateTime date_time) {
+            return "%d:%02d".printf(date_time.get_hour(), date_time.get_minute());
         }
 
         private void render_task(Model.Activity activity) {

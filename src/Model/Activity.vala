@@ -27,9 +27,9 @@ namespace Activities.Model {
         internal string remote_id { public get; set; }
         internal string description { public get; set; }
         internal Task task { public get; set; }
-        internal LocalDateTime start_date { public get; set; }
-        internal LocalDateTime? end_date { public get; set; }
-        internal Gee.Set<string> tags { public get; set; }
+        internal GLib.DateTime start_date { public get; set; }
+        internal GLib.DateTime? end_date { public get; set; }
+        internal Gee.Set<string> tags { public get; set; default = new Gee.HashSet<string>(); }
 
         internal Activity() {}
     }

@@ -49,7 +49,8 @@ namespace Activities.Model {
             var task2 = new Task();
             task2.local_id = "t2";
             task2.key = "TK-08";
-            task2.description = "Work";
+            task2.description = "Project A";
+            task2.notes = "TODO :\n - specs\n - ???\n - profit";
             task2.closed = false;
             backend.tasks.add(task2);
 
@@ -57,24 +58,24 @@ namespace Activities.Model {
             activity.local_id = "a1";
             activity.description = "";
             activity.task = task1;
-            activity.start_date = new LocalDateTime(2013, 12, 25, 9, 0, 0);
-            activity.end_date = new LocalDateTime(2013, 12, 25, 12, 0, 0);
+            activity.start_date = new DateTime.local(2013, 12, 25, 9, 0, 0);
+            activity.end_date = new DateTime.local(2013, 12, 25, 12, 0, 0);
             backend.activities.add(activity);
 
             activity = new Model.Activity();
             activity.local_id = "a2";
             activity.description = "Work on project A";
             activity.task = task2;
-            activity.start_date = new LocalDateTime(2013, 12, 25, 13, 0, 0);
-            activity.end_date = new LocalDateTime(2013, 12, 25, 17, 30, 0);
+            activity.start_date = new DateTime.local(2013, 12, 25, 13, 0, 0);
+            activity.end_date = new DateTime.local(2013, 12, 25, 17, 30, 0);
             backend.activities.add(activity);
 
             activity = new Model.Activity();
             activity.local_id = "a3";
             activity.description = "Bug fixing";
             activity.task = task2;
-            activity.start_date = new LocalDateTime(2013, 12, 24, 8, 45, 0);
-            activity.end_date = new LocalDateTime(2013, 12, 24, 17, 15, 0);
+            activity.start_date = new DateTime.local(2013, 12, 24, 8, 45, 0);
+            activity.end_date = new DateTime.local(2013, 12, 24, 17, 15, 0);
             backend.activities.add(activity);
 
             return backend;
