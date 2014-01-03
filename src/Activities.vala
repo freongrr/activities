@@ -82,6 +82,11 @@ namespace Activities {
             this.main_window.destroy.connect((e) => { Gtk.main_quit(); });
             this.main_window.delete_event.connect((e) => { update_saved_state(); return false; });
 
+            // TODO : this could stay a pure view thing I could not care about
+            this.main_window.activity_selected.connect((a) => {
+                this.main_window.visible_activity = a;
+            });
+
             // TODO : is there no better way to register shortcuts???
             this.main_window.key_press_event.connect((e) => {
                 switch (e.keyval) {
@@ -141,10 +146,27 @@ namespace Activities {
 
         private void create_toolbar() {
             View.AppToolbar toolbar = new View.AppToolbar();
-            toolbar.menu.about  .activate.connect(() => show_about(main_window));
             toolbar.title = this.program_name;
             toolbar.subtitle = "Keep track of your time";
-            main_window.set_titlebar(toolbar);
+
+            // TODO
+            toolbar.new_button.clicked.connect(() => this.on_new_activity());
+            toolbar.resume_button.clicked.connect(() => stdout.printf("Resume button clicked\n"));
+            toolbar.stop_button.clicked.connect(() => stdout.printf("Stop button clicked\n"));
+            toolbar.delete_button.clicked.connect(() => stdout.printf("Delete button clicked\n"));
+            toolbar.menu.about.activate.connect(() => show_about(main_window));
+
+            this.main_window.set_titlebar(toolbar);
+            this.main_window.activity_selected.connect((a) => {
+                toolbar.resume_button.sensitive = (a != null);
+                toolbar.stop_button.sensitive = (a != null);
+                toolbar.delete_button.sensitive = (a != null);
+            });
+        }
+
+        private void on_new_activity() {
+            stdout.printf("New Activity\n");
+            this.main_window.visible_activity = new Model.Activity();
         }
     }
 

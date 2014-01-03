@@ -24,19 +24,53 @@ namespace Activities.View {
     public class AppToolbar : Gtk.HeaderBar {
 
         public AppMenu menu { get; private set; }
+        public Gtk.ToolButton new_button { get; private set; }
+        public Gtk.ToolButton resume_button { get; private set; }
+        public Gtk.ToolButton stop_button { get; private set; }
+        public Gtk.ToolButton delete_button { get; private set; }
 
         public AppToolbar() {
             show_close_button = true;
-            get_style_context().add_class("primary-toolbar"); 
+            get_style_context().add_class("primary-toolbar");
 
-            // TODO : add more
-            menu = new AppMenu();
+            this.menu = new AppMenu();
+            this.new_button = this.create_new_button();
+            this.resume_button = this.create_resume_button();
+            this.stop_button = this.create_stop_button();
+            this.delete_button = this.create_delete_button();
 
-            // Layout
-            pack_end(createAppMenu());
+            pack_start(this.new_button);
+            pack_start(this.resume_button);
+            pack_start(this.stop_button);
+            pack_start(this.delete_button);
+            pack_end(this.create_app_menu());
         }
 
-        private Granite.Widgets.AppMenu createAppMenu() {
+        private Gtk.ToolButton create_new_button() {
+            Gtk.Image image = new Gtk.Image.from_icon_name("document-new", Gtk.IconSize.SMALL_TOOLBAR);
+            Gtk.ToolButton button = new Gtk.ToolButton(image, null);
+            return button;
+        }
+
+        private Gtk.ToolButton create_resume_button() {
+            Gtk.Image image = new Gtk.Image.from_icon_name("media-playback-start", Gtk.IconSize.SMALL_TOOLBAR);
+            Gtk.ToolButton button = new Gtk.ToolButton(image, null);
+            return button;
+        }
+
+        private Gtk.ToolButton create_stop_button() {
+            Gtk.Image image = new Gtk.Image.from_icon_name("media-playback-stop", Gtk.IconSize.SMALL_TOOLBAR);
+            Gtk.ToolButton button = new Gtk.ToolButton(image, null);
+            return button;
+        }
+
+        private Gtk.ToolButton create_delete_button() {
+            Gtk.Image image = new Gtk.Image.from_icon_name("edit-delete", Gtk.IconSize.SMALL_TOOLBAR);
+            Gtk.ToolButton button = new Gtk.ToolButton(image, null);
+            return button;
+        }
+
+        private Granite.Widgets.AppMenu create_app_menu() {
             var appMenu = new Granite.Widgets.AppMenu(menu);
             return appMenu;
         }

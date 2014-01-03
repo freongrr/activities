@@ -23,6 +23,7 @@ namespace Activities.Model {
 
     public class Activity : GLib.Object {
 
+        // TODO : This should be nullable. i.e. new activity
         internal string local_id { public get; set; }
         internal string remote_id { public get; set; }
         internal string description { public get; set; }
@@ -32,5 +33,16 @@ namespace Activities.Model {
         internal Gee.Set<string> tags { public get; set; default = new Gee.HashSet<string>(); }
 
         internal Activity() {}
+
+        public string to_string() {
+            return "Activity {local_id=%s, remote_id=%s, description=%s, task=%s, start_date=%s, end_date=%s, tags=%d}".printf(
+                this.local_id,
+                this.remote_id,
+                this.description,
+                this.task == null ? "(null)" : this.task.to_string(),
+                this.start_date == null ? "(null)" : this.start_date.to_string(),
+                this.end_date == null ? "(null)" : this.end_date.to_string(),
+                this.tags.size);
+        }
     }
 }

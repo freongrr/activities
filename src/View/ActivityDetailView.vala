@@ -30,7 +30,7 @@ namespace Activities.View {
 
             set {
                 this._activity = value;
-                update_view();
+                this.update_view();
             }
         }
 
@@ -105,7 +105,15 @@ namespace Activities.View {
         }
 
         private void on_changed() {
-            // TODO
+            // TODO :
+            // 1. rebuild the activity or task
+            // 2. fire an event
+            // 3. the view must catch it and fire it again?
+            // 4. then the application must pass the updated activity to the backend
+            // 5. the bakend may send it right away or wait
+
+            // TODO : should we change the task/activity in place? (also, the setters are not visible...)
+
             stdout.printf(
                 "Activity changed:\nTask: %s\nDescription: %s\nTags: %s\nStart: %s\nEnd: %s\nNotes: %s\n",
                 this.task_entry.text,

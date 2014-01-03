@@ -23,57 +23,106 @@ namespace Activities.View {
 
     public class MainWindow : Gtk.Window {
 
-        private Granite.Widgets.SourceList project_list;
-        private Model.ActivityListStore activity_store;
-        private ActivityDetailView detail_view;
+        public signal void activity_selected(Model.Activity? activity);
 
+        public Model.Activity visible_activity {
+            get {
+                return this.activity_detail_view.activity;
+            }
+
+            set {
+                this.activity_detail_view.activity = value;
+                this.select_activity(value);
+            }
+        }
+
+        private Model.ActivityListStore activity_list_store;
+        private Granite.Widgets.SourceList project_list;
+        private View.ActivityListView activity_list_view;
+        private ActivityDetailView activity_detail_view;
+
+        // TODO : pass the store?
         public MainWindow(string title) {
             this.title = title;
             this.icon_name = "preferences-system-time";
             this.set_size_request(700, 400);
 
-            // Projects
+            this.create_project_list();
+            this.create_activity_list_view();
+            this.create_activity_detail_view();
+            this.layout();
+        }
 
+        private void create_project_list() {
+            // TODO : expand the source list by default
             this.project_list = new Granite.Widgets.SourceList();
             this.project_list.set_size_request(150, -1);
 
+            // HACK - this is just to see it on the screen
             var local_item = new Granite.Widgets.SourceList.ExpandableItem("Local");
             var trash_item = new Granite.Widgets.SourceList.Item ("Trash");
             local_item.add(trash_item);
 
             this.project_list.root.add(local_item);
+        }
 
-            // TODO : expand the source list by default
+        private void create_activity_list_view() {
+            this.activity_list_store = new Model.ActivityListStore();
 
-            // Activities
+            this.activity_list_view = new View.ActivityListView(this.activity_list_store);
+            this.activity_list_view.set_size_request(200, -1);
+            this.activity_list_view.get_selection().changed.connect(() => {
+                stdout.printf("Selection changed\n");
+                Gtk.TreeModel model;
+                Gtk.TreeIter iter;
+                if (this.activity_list_view.get_selection().get_selected(out model, out iter)) {
+                    GLib.Value v;
+                    this.activity_list_store.get_value(iter, 0, out v);
+                    stdout.printf("Selection => %s\n", ((Model.Activity) v).to_string());
+                    this.activity_selected((Model.Activity) v);
+                } else {
+                    stdout.printf("Selection => NULL\n");
+                    this.activity_selected(null);
+                }
+            });
+        }
 
-            this.activity_store = new Model.ActivityListStore();
-            var activity_view = new View.ActivityListView(activity_store);
-            activity_view.set_size_request(200, -1);
+        private void create_activity_detail_view() {
+            this.activity_detail_view = new ActivityDetailView();
+            // TODO : listen to events
+        }
 
-activity_view.get_selection().changed.connect(() => {
-    Gtk.TreeModel model;
-    Gtk.TreeIter iter;
-    if (activity_view.get_selection().get_selected(out model, out iter)) {
-        GLib.Value v;
-        this.activity_store.get_value(iter, 0, out v);
-        this.detail_view.activity = (Model.Activity) v;
-    }
-});
-
-            // Details
-            this.detail_view = new ActivityDetailView();
-
-            // Layout
-
+        private void layout() {
             var split_panel = new Granite.Widgets.ThinPaned();
-            split_panel.pack1(activity_view, false, true);
-            split_panel.pack2(detail_view, true, false);
+            split_panel.pack1(this.activity_list_view, false, true);
+            split_panel.pack2(this.activity_detail_view, true, false);
 
             var split_split_panel = new Granite.Widgets.ThinPaned();
-            split_split_panel.pack1(project_list, false, true);
+            split_split_panel.pack1(this.project_list, false, true);
             split_split_panel.pack2(split_panel, true, true);
             this.add(split_split_panel);
+        }
+
+        private void select_activity(Model.Activity activity) {
+            bool found = false;
+            var selection = this.activity_list_view.get_selection();
+
+            this.activity_list_store.@foreach((model, path, iter) => {
+                GLib.Value v;
+                this.activity_list_store.get_value(iter, 0, out v);
+                if (v == activity) {
+                    found = true;
+                    if (!selection.iter_is_selected(iter)) {
+                        selection.select_iter(iter);
+                    }
+                    return true;
+                }
+                return false;
+            });
+
+            if (!found) {
+                selection.unselect_all();
+            }
         }
 
         public void add_project(Model.Project project) {
@@ -86,7 +135,7 @@ activity_view.get_selection().changed.connect(() => {
             stdout.printf("Activities in project %s: %d\n", project.name, project.activities.size);
             // TODO : this is just a test. this should be done when the selection changes
             foreach (var activity in project.activities) {
-                activity_store.add(activity);
+                activity_list_store.add(activity);
             }
         }
 

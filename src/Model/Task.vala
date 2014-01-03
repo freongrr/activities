@@ -33,5 +33,15 @@ namespace Activities.Model {
         // TODO : icon (i.e. bug/feature request), priority
 
         internal Task() {}
+
+        public string to_string() {
+            return "Task {local_id=%s, remote_id=%s, key=%s, description=%s, notes=%s, closed=%s}".printf(
+                this.local_id,
+                this.remote_id,
+                this.key,
+                this.description,
+                this.notes,
+                this.closed.to_string());
+        }
     }
 }
