@@ -23,18 +23,16 @@ namespace Activities.Model {
 
     public interface Backend : GLib.Object {
 
+        public signal void created(Activity activity);
+        public signal void updated(Activity activity);
+        public signal void deleted(Activity activity);
+
         public abstract string get_id();
-
         public abstract string get_name();
-
         public abstract string get_icon_name();
-
-        public abstract Gee.Collection<Activity> get_activities(int days);
-
-        public abstract Gee.Collection<Task> get_tasks(string query);
-
-        public abstract void export_artivity(Activity activity);
-
-        // TODO : events when new activities are loaded?
-    }
+        public abstract void create_activity(Activity activity);
+        public abstract void update_activity(Activity activity);
+        public abstract void delete_activity(Activity activity);
+        public abstract Gee.Collection<Task> find_tasks(string query);
+     }
 }

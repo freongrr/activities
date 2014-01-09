@@ -21,9 +21,9 @@
 
 namespace Activities.View {
 
-    public class ActivityListView : Gtk.TreeView {
+    public class ActivityView : Gtk.TreeView {
 
-        public ActivityListView(Model.ActivityListStore store) {
+        public ActivityView(Model.ActivityStore store) {
             set_model(store);
 
             append_column(create_column());
@@ -36,7 +36,7 @@ namespace Activities.View {
             column.pack_start(renderer, true);
             column.add_attribute(renderer, "activity", 0);
             column.set_resizable(false);
-  
+
 //            column.set_sizing(Gtk.TreeViewColumnSizing.FIXED);
 //            column.set_fixed_width(200);
 

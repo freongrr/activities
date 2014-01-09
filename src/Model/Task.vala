@@ -24,15 +24,29 @@ namespace Activities.Model {
     public class Task : GLib.Object {
 
         internal string local_id { public get; set; }
-        internal string remote_id { public get; set; }
-        internal string key { public get; set; }
+        internal string? remote_id { public get; set; }
+        internal string? key { public get; set; }
         internal string description { public get; set; }
-        internal string notes { public get; set; default = ""; }
+        internal string notes { public get; set; }
         internal bool closed { public get; set; }
 
         // TODO : icon (i.e. bug/feature request), priority
 
-        internal Task() {}
+        public Task(string local_id) {
+            this.local_id = local_id;
+            this.description = "";
+            this.notes = "";
+            this.closed = false;
+        }
+
+        public Task.copy_from(Task t) {
+            this.local_id = t.local_id;
+            this.remote_id = t.remote_id;
+            this.key = t.key;
+            this.description = t.description;
+            this.notes = t.notes;
+            this.closed = t.closed;
+        }
 
         public string to_string() {
             return "Task {local_id=%s, remote_id=%s, key=%s, description=%s, notes=%s, closed=%s}".printf(

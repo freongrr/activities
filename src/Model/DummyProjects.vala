@@ -122,16 +122,17 @@ namespace Activities.Model {
             return this.icon_name;
         }
 
-        public Gee.Collection<Activity> get_activities(int days) {
-            return this.activities;
+        public void create_activity(Activity activity) {
         }
 
-        public Gee.Collection<Task> get_tasks(string query) {
+        public void update_activity(Activity activity) {
+        }
+
+        public void delete_activity(Activity activity) {
+        }
+
+        public Gee.Collection<Task> find_tasks(string query) {
             return this.tasks;
-        }
-
-        public void export_artivity(Activity activity) {
-            // TODO : can I throw exceptions?
         }
     }
 }

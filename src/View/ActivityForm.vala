@@ -23,13 +23,15 @@ namespace Activities.View {
 
     internal class ActivityDetailView : Gtk.Box {
 
+        public signal void changed(Model.Activity activity);
+
         public Model.Activity activity {
             get {
                 return this._activity;
             }
 
             set {
-                this._activity = value;
+                this._activity = new Model.Activity.copy_from(value);
                 this.update_view();
             }
         }
@@ -105,23 +107,12 @@ namespace Activities.View {
         }
 
         private void on_changed() {
-            // TODO :
-            // 1. rebuild the activity or task
-            // 2. fire an event
-            // 3. the view must catch it and fire it again?
-            // 4. then the application must pass the updated activity to the backend
-            // 5. the bakend may send it right away or wait
+            this._activity.description = this.description_entry.text;
+            this._activity.start_date = this.start_picker.date_time;
+            this._activity.end_date = this.end_picker.date_time;
+            // TODO : other attributes
 
-            // TODO : should we change the task/activity in place? (also, the setters are not visible...)
-
-            stdout.printf(
-                "Activity changed:\nTask: %s\nDescription: %s\nTags: %s\nStart: %s\nEnd: %s\nNotes: %s\n",
-                this.task_entry.text,
-                this.description_entry.text,
-                this.tags_entry.text,
-                this.start_picker.date_time.to_string(),
-                this.end_picker.date_time.to_string(),
-                this.notes_text_view.buffer.text);
+            stdout.printf("Activity changed: %s\n", this._activity.to_string());
         }
 
         private void update_view() {

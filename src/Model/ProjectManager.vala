@@ -28,19 +28,67 @@ namespace Activities.Model {
         public signal void project_added(Project project);
         public signal void project_removed(Project project);
 
-        public ProjectManager() {
+        private Settings.ProjectDefinitions project_definitions;
+
+        public ProjectManager(Settings.ProjectDefinitions project_definitions) {
             this.projects = new Gee.HashSet<Project>();
+            this.project_definitions = project_definitions;
+        }
+
+        public void load_projects() {
+            for (int i = 0; i < this.project_definitions.count; i++) {
+                var project_id = this.project_definitions.ids[i];
+                var project_name = this.project_definitions.names[i];
+                var backend_name = this.project_definitions.backends[i];
+
+                // TODO : properly instantiate the class
+                var backend = new DummyBackend();
+                var project = create_project(project_id, project_name, backend);
+                this.add_project(project);
+            }
+        }
+
+        private Project create_project(string project_id, string project_name, Backend backend) {
+            var store = new ActivityStore();
+
+            // Populate the store using the Serializer
+            var serializer = new DummySerializer();
+            var activities = serializer.load_activities();
+            foreach (var a in activities) {
+                store.add_record(a);
+            }
+
+            // Connect both to the backend
+            backend.created.connect((a) => {
+                serializer.create_activity(a);
+                store.add_record(a);
+            });
+
+            backend.updated.connect((a) => {
+                serializer.update_activity(a);
+                store.update_record(a);
+            });
+
+            backend.deleted.connect((a) => {
+                serializer.delete_activity(a);
+                store.delete_record(a);
+            });
+
+            // And shove it all in a Project
+            return new Project(project_id, project_name, backend, store);
         }
 
         public void add_project(Project project) {
             if (this.projects.add(project)) {
                 this.project_added(project);
+                // TODO : add it to ProjectDefinitions
             }
         }
 
         public void remove_project(Project project) {
             if (this.projects.remove(project)) {
                 this.project_removed(project);
+                // TODO : remove from ProjectDefinitions
             }
         }
     }

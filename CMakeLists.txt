@@ -37,18 +37,22 @@ configure_file (${CMAKE_SOURCE_DIR}/src/config.vala.cmake ${CMAKE_SOURCE_DIR}/sr
 vala_precompile (VALA_C ${EXEC_NAME}
     src/Activities.vala
     src/config.vala
-    src/Model/ActivityListStore.vala
+    src/Model/ActivityStore.vala
     src/Model/Activity.vala
     src/Model/Backend.vala
     src/Model/DummyProjects.vala
+    src/Model/DummySerializer.vala
     src/Model/LocalDateTime.vala
     src/Model/ProjectManager.vala
     src/Model/Project.vala
+    src/Model/Serializer.vala
+    src/Model/SynchronizedBackend.vala
     src/Model/Task.vala
+    src/Settings/ProjectDefinitions.vala
     src/Settings/SavedState.vala
     src/View/ActivityDetailView.vala
     src/View/ActivityListRenderer.vala
-    src/View/ActivityListView.vala
+    src/View/ActivityList.vala
     src/View/AppMenu.vala
     src/View/AppToolbar.vala
     src/View/DateTimePicker.vala

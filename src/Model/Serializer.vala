@@ -21,18 +21,12 @@
 
 namespace Activities.Model {
 
-    public class Project : GLib.Object {
+    internal interface Serializer {
 
-        public string id { get; private set; }
-        public string name { get; private set; }
-        public Backend backend { get; private set; }
-        public ActivityStore store { get; private set; }
+        internal abstract Gee.Collection<Activity> load_activities();
 
-        internal Project(string id, string name, Backend backend, ActivityStore store) {
-            this.id = id;
-            this.name = name;
-            this.backend = backend;
-            this.store = store;
-        }
+        internal abstract void create_activity(Activity activity);
+        internal abstract void update_activity(Activity activity);
+        internal abstract void delete_activity(Activity activity);
     }
 }

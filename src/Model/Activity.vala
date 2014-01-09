@@ -23,16 +23,30 @@ namespace Activities.Model {
 
     public class Activity : GLib.Object {
 
-        // TODO : This should be nullable. i.e. new activity
         internal string local_id { public get; set; }
-        internal string remote_id { public get; set; }
+        internal string? remote_id { public get; set; }
         internal string description { public get; set; }
-        internal Task task { public get; set; }
-        internal GLib.DateTime start_date { public get; set; }
+        internal Task? task { public get; set; }
+        internal GLib.DateTime? start_date { public get; set; }
         internal GLib.DateTime? end_date { public get; set; }
-        internal Gee.Set<string> tags { public get; set; default = new Gee.HashSet<string>(); }
+        internal Gee.Set<string> tags { public get; set; }
 
-        internal Activity() {}
+        public Activity(string local_id) {
+            this.local_id = local_id;
+            this.description = "";
+            this.tags = new Gee.HashSet<string>();
+        }
+
+        public Activity.copy_from(Activity a) {
+            this.local_id = a.local_id;
+            this.remote_id = a.remote_id;
+            this.description = a.description;
+            this.task = a.task == null ? null : new Model.Task.copy_from(a.task);
+            this.start_date = a.start_date;
+            this.end_date = a.end_date;
+            this.tags = new Gee.HashSet<string>();
+            this.tags.add_all(a.tags);
+        }
 
         public string to_string() {
             return "Activity {local_id=%s, remote_id=%s, description=%s, task=%s, start_date=%s, end_date=%s, tags=%d}".printf(

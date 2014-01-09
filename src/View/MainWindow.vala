@@ -23,7 +23,8 @@ namespace Activities.View {
 
     public class MainWindow : Gtk.Window {
 
-        public signal void activity_selected(Model.Activity? activity);
+        public signal void selected(Model.Activity? activity);
+        public signal void changed(Model.Activity activity);
 
         public Model.Activity visible_activity {
             get {
@@ -36,19 +37,17 @@ namespace Activities.View {
             }
         }
 
-        private Model.ActivityListStore activity_list_store;
         private Granite.Widgets.SourceList project_list;
-        private View.ActivityListView activity_list_view;
+        private View.ActivityView activity_list;
         private ActivityDetailView activity_detail_view;
 
-        // TODO : pass the store?
         public MainWindow(string title) {
             this.title = title;
             this.icon_name = "preferences-system-time";
             this.set_size_request(700, 400);
 
             this.create_project_list();
-            this.create_activity_list_view();
+            this.create_activity_list();
             this.create_activity_detail_view();
             this.layout();
         }
@@ -66,18 +65,18 @@ namespace Activities.View {
             this.project_list.root.add(local_item);
         }
 
-        private void create_activity_list_view() {
-            this.activity_list_store = new Model.ActivityListStore();
+        private void create_activity_list() {
+            var dummy_store = new Model.ActivityStore();
 
-            this.activity_list_view = new View.ActivityListView(this.activity_list_store);
-            this.activity_list_view.set_size_request(200, -1);
-            this.activity_list_view.get_selection().changed.connect(() => {
+            this.activity_list = new View.ActivityListView(dummy_store);
+            this.activity_list.set_size_request(200, -1);
+            this.activity_list.get_selection().changed.connect(() => {
                 stdout.printf("Selection changed\n");
                 Gtk.TreeModel model;
                 Gtk.TreeIter iter;
-                if (this.activity_list_view.get_selection().get_selected(out model, out iter)) {
+                if (this.activity_list.get_selection().get_selected(out model, out iter)) {
                     GLib.Value v;
-                    this.activity_list_store.get_value(iter, 0, out v);
+                    this.activity_list.model.get_value(iter, 0, out v);
                     stdout.printf("Selection => %s\n", ((Model.Activity) v).to_string());
                     this.activity_selected((Model.Activity) v);
                 } else {
@@ -89,12 +88,14 @@ namespace Activities.View {
 
         private void create_activity_detail_view() {
             this.activity_detail_view = new ActivityDetailView();
-            // TODO : listen to events
+            this.activity_detail_view.changed.connect((a) => {
+                this.changed(a);
+            });
         }
 
         private void layout() {
             var split_panel = new Granite.Widgets.ThinPaned();
-            split_panel.pack1(this.activity_list_view, false, true);
+            split_panel.pack1(this.activity_list, false, true);
             split_panel.pack2(this.activity_detail_view, true, false);
 
             var split_split_panel = new Granite.Widgets.ThinPaned();
@@ -105,11 +106,11 @@ namespace Activities.View {
 
         private void select_activity(Model.Activity activity) {
             bool found = false;
-            var selection = this.activity_list_view.get_selection();
+            var selection = this.activity_list.get_selection();
 
-            this.activity_list_store.@foreach((model, path, iter) => {
+            this.activity_list.model.@foreach((model, path, iter) => {
                 GLib.Value v;
-                this.activity_list_store.get_value(iter, 0, out v);
+                this.activity_list.model.get_value(iter, 0, out v);
                 if (v == activity) {
                     found = true;
                     if (!selection.iter_is_selected(iter)) {
@@ -132,11 +133,9 @@ namespace Activities.View {
             var project_item = new Granite.Widgets.SourceList.Item(project.name);
             parent_item.add(project_item);
 
-            stdout.printf("Activities in project %s: %d\n", project.name, project.activities.size);
             // TODO : this is just a test. this should be done when the selection changes
-            foreach (var activity in project.activities) {
-                activity_list_store.add(activity);
-            }
+            // TODO : how do I show multiple projects?
+            this.activity_list.model = project.store;
         }
 
         public void remove_project(Model.Project project) {

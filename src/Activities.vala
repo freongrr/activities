@@ -52,6 +52,7 @@ namespace Activities {
         }
 
         private Settings.SavedState saved_state;
+        private Settings.ProjectDefinitions project_definitions;
         private Model.ProjectManager project_manager;
         private View.MainWindow main_window;
 
@@ -62,7 +63,9 @@ namespace Activities {
             }
 
             this.saved_state = new Settings.SavedState();
-            this.project_manager = new Model.ProjectManager();
+            this.project_definitions = new Settings.ProjectDefinitions();
+
+            this.project_manager = new Model.ProjectManager(this.project_definitions);
 
             create_main_window();
             create_toolbar();
@@ -83,8 +86,14 @@ namespace Activities {
             this.main_window.delete_event.connect((e) => { update_saved_state(); return false; });
 
             // TODO : this could stay a pure view thing I could not care about
-            this.main_window.activity_selected.connect((a) => {
+            this.main_window.selected.connect((a) => {
                 this.main_window.visible_activity = a;
+            });
+
+            this.main_window.changed.connect((a) => {
+                // TODO : how do I find the selected project/backend?
+                backend.update_activity(a);
+                backend.synchronize();
             });
 
             // TODO : is there no better way to register shortcuts???
@@ -157,7 +166,8 @@ namespace Activities {
             toolbar.menu.about.activate.connect(() => show_about(main_window));
 
             this.main_window.set_titlebar(toolbar);
-            this.main_window.activity_selected.connect((a) => {
+            this.main_window.selected.connect((a) => {
+                // TODO : test the status (e.g. the activity is started/finished)
                 toolbar.resume_button.sensitive = (a != null);
                 toolbar.stop_button.sensitive = (a != null);
                 toolbar.delete_button.sensitive = (a != null);
