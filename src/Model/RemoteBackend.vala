@@ -27,12 +27,12 @@ namespace Activities.Model {
             // TODO : how do I prevent modifications while synchronize
             this.merge_remote_changes(activity_store);
             this.push_local_changes(activity_store);
+
+            activity_store.last_synchronization = new DateTime.now_local();
         }
 
         private void merge_remote_changes(ActivityStore activity_store) {
-            // TODO : if we already asked we only need to get the difference (1 day / since X hours)
-            var remote_activities = this.fetch_activities(7);
-
+            var remote_activities = this.fetch_changes(activity_store);
             foreach (var remote_activity in remote_activities) {
                 var local_activity = this.find_local_activity(activity_store, remote_activity.remote_id);
                 if (local_activity == null) {
@@ -48,6 +48,16 @@ namespace Activities.Model {
             // 1. get the local activities for the last X days
             // 2. ask the backend if this remote_id exists
             // 3. handle conflicts when the local activity is pending changes
+        }
+
+        private Gee.Collection<Activity> fetch_changes(ActivityStore activity_store) {
+            // If we already asked we only need to get the most recent changes
+            if (activity_store.last_synchronization == null) {
+                return this.fetch_activities(7 /* TODO : should be driven by a parameter of the Project/Backend */);
+            } else {
+                // TODO : pass a date time?
+                return this.fetch_activities(1);
+            }
         }
 
         private Activity? find_local_activity(ActivityStore activity_store, string remote_id) {

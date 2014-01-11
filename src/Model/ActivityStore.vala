@@ -21,9 +21,11 @@
 
 namespace Activities.Model {
 
+    // TODO : interface
     public class ActivityStore : Gtk.ListStore {
 
         internal Serializer serializer;
+        internal DateTime? last_synchronization;
 
         public ActivityStore() {
             this.set_column_types({typeof (Activity)});
