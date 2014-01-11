@@ -38,7 +38,7 @@ namespace Activities.View {
         }
 
         private Granite.Widgets.SourceList project_list;
-        private View.ActivityView activity_list;
+        private View.ActivityList activity_list;
         private ActivityDetailView activity_detail_view;
 
         public MainWindow(string title) {
@@ -66,9 +66,10 @@ namespace Activities.View {
         }
 
         private void create_activity_list() {
+            // TODO : make this the All store that aggregates all projects
             var dummy_store = new Model.ActivityStore();
 
-            this.activity_list = new View.ActivityListView(dummy_store);
+            this.activity_list = new View.ActivityList(dummy_store);
             this.activity_list.set_size_request(200, -1);
             this.activity_list.get_selection().changed.connect(() => {
                 stdout.printf("Selection changed\n");
@@ -78,10 +79,10 @@ namespace Activities.View {
                     GLib.Value v;
                     this.activity_list.model.get_value(iter, 0, out v);
                     stdout.printf("Selection => %s\n", ((Model.Activity) v).to_string());
-                    this.activity_selected((Model.Activity) v);
+                    this.selected((Model.Activity) v);
                 } else {
                     stdout.printf("Selection => NULL\n");
-                    this.activity_selected(null);
+                    this.selected(null);
                 }
             });
         }

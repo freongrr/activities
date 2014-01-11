@@ -21,12 +21,26 @@
 
 namespace Activities.Model {
 
-    internal interface Serializer : Object {
+    public class DummyBackend : GLib.Object, Backend {
 
-        internal abstract Gee.Collection<Activity> load_activities();
+        public string get_id() {
+            return "dummy_backend";
+        }
 
-        internal abstract void create_activity(Activity activity);
-        internal abstract void update_activity(Activity activity);
-        internal abstract void delete_activity(Activity activity);
-    }
+        public string get_name() {
+            return "Dummy Backend";
+        }
+
+        public string get_icon_name() {
+            return "dummy-backend-icon";
+        }
+
+        public void synchronize(ActivityStore activity_store) {
+            // NO OP
+        }
+
+        public Gee.Collection<Task> find_tasks(string query) {
+            return new Gee.ArrayList<Task>();
+        }
+     }
 }

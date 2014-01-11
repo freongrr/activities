@@ -73,9 +73,9 @@ namespace Activities {
             add_window(main_window);
             main_window.show_all();
 
-            var dummy_projects = new Model.DummyProjects();
-            this.project_manager.add_project(dummy_projects.work_project);
-            this.project_manager.add_project(dummy_projects.personal_project);
+            // Add a dummy project
+            var project = this.project_manager.create_project("dummy_project", "Work", new Model.DummyBackend());
+            this.project_manager.add_project(project);
 
             Gtk.main();
         }
@@ -92,8 +92,8 @@ namespace Activities {
 
             this.main_window.changed.connect((a) => {
                 // TODO : how do I find the selected project/backend?
-                backend.update_activity(a);
-                backend.synchronize();
+//                backend.update_activity(a);
+//                backend.synchronize();
             });
 
             // TODO : is there no better way to register shortcuts???
@@ -176,7 +176,10 @@ namespace Activities {
 
         private void on_new_activity() {
             stdout.printf("New Activity\n");
-            this.main_window.visible_activity = new Model.Activity();
+            var local_id = "activity";
+            local_id += "_" + new GLib.DateTime.now_utc().to_unix().to_string();
+            local_id += "_" + GLib.Random.int_range(0, 999).to_string();
+            this.main_window.visible_activity = new Model.Activity(local_id);
         }
     }
 

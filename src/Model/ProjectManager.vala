@@ -21,7 +21,7 @@
 
 namespace Activities.Model {
 
-    public class ProjectManager : GLib.Object {
+    public class ProjectManager : Object {
 
         public Gee.HashSet<Project> projects { get; private set; }
 
@@ -41,38 +41,25 @@ namespace Activities.Model {
                 var project_name = this.project_definitions.names[i];
                 var backend_name = this.project_definitions.backends[i];
 
-                // TODO : properly instantiate the class
-                var backend = new DummyBackend();
+                var backend = new DummyBackend(); // TODO : properly instantiate the class
                 var project = create_project(project_id, project_name, backend);
                 this.add_project(project);
             }
         }
 
-        private Project create_project(string project_id, string project_name, Backend backend) {
+        // TODO : not sure this method should be public...
+        public Project create_project(string project_id, string project_name, Backend backend) {
             var store = new ActivityStore();
 
             // Populate the store using the Serializer
-            var serializer = new DummySerializer();
+            var serializer = new DummySerializer(project_id); // TODO : proper serializer
             var activities = serializer.load_activities();
             foreach (var a in activities) {
                 store.add_record(a);
             }
 
-            // Connect both to the backend
-            backend.created.connect((a) => {
-                serializer.create_activity(a);
-                store.add_record(a);
-            });
-
-            backend.updated.connect((a) => {
-                serializer.update_activity(a);
-                store.update_record(a);
-            });
-
-            backend.deleted.connect((a) => {
-                serializer.delete_activity(a);
-                store.delete_record(a);
-            });
+            // Set the serializer after populating the store to avoid saving the activities for nothing
+            store.serializer = serializer;
 
             // And shove it all in a Project
             return new Project(project_id, project_name, backend, store);

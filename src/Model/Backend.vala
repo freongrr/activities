@@ -21,18 +21,14 @@
 
 namespace Activities.Model {
 
-    public interface Backend : GLib.Object {
-
-        public signal void created(Activity activity);
-        public signal void updated(Activity activity);
-        public signal void deleted(Activity activity);
+    public interface Backend : Object {
 
         public abstract string get_id();
         public abstract string get_name();
         public abstract string get_icon_name();
-        public abstract void create_activity(Activity activity);
-        public abstract void update_activity(Activity activity);
-        public abstract void delete_activity(Activity activity);
+
+        public abstract void synchronize(ActivityStore activity_store);
+
         public abstract Gee.Collection<Task> find_tasks(string query);
      }
 }

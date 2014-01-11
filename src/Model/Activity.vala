@@ -21,7 +21,16 @@
 
 namespace Activities.Model {
 
+    public enum Status {
+        UP_TO_DATE,
+        CREATED_LOCALLY,
+        UPDATED_LOCALLY,
+        DELETED_LOCALLY
+    }
+
     public class Activity : GLib.Object {
+
+        public Status status { get; set; }
 
         internal string local_id { public get; set; }
         internal string? remote_id { public get; set; }
@@ -32,12 +41,14 @@ namespace Activities.Model {
         internal Gee.Set<string> tags { public get; set; }
 
         public Activity(string local_id) {
+            this.status = Status.UP_TO_DATE;
             this.local_id = local_id;
             this.description = "";
             this.tags = new Gee.HashSet<string>();
         }
 
         public Activity.copy_from(Activity a) {
+            this.status = a.status;
             this.local_id = a.local_id;
             this.remote_id = a.remote_id;
             this.description = a.description;
@@ -49,7 +60,8 @@ namespace Activities.Model {
         }
 
         public string to_string() {
-            return "Activity {local_id=%s, remote_id=%s, description=%s, task=%s, start_date=%s, end_date=%s, tags=%d}".printf(
+            return "Activity {status=%s, local_id=%s, remote_id=%s, description=%s, task=%s, start_date=%s, end_date=%s, tags=%d}".printf(
+                this.status.to_string(),
                 this.local_id,
                 this.remote_id,
                 this.description,

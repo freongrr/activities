@@ -40,13 +40,12 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Model/ActivityStore.vala
     src/Model/Activity.vala
     src/Model/Backend.vala
-    src/Model/DummyProjects.vala
+    src/Model/DummyBackend.vala
     src/Model/DummySerializer.vala
-    src/Model/LocalDateTime.vala
     src/Model/ProjectManager.vala
     src/Model/Project.vala
+    src/Model/RemoteBackend.vala
     src/Model/Serializer.vala
-    src/Model/SynchronizedBackend.vala
     src/Model/Task.vala
     src/Settings/ProjectDefinitions.vala
     src/Settings/SavedState.vala

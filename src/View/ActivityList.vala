@@ -21,9 +21,9 @@
 
 namespace Activities.View {
 
-    public class ActivityView : Gtk.TreeView {
+    public class ActivityList : Gtk.TreeView {
 
-        public ActivityView(Model.ActivityStore store) {
+        public ActivityList(Model.ActivityStore store) {
             set_model(store);
 
             append_column(create_column());

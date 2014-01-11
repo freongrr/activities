@@ -23,6 +23,8 @@ namespace Activities.Model {
 
     public class ActivityStore : Gtk.ListStore {
 
+        internal Serializer serializer;
+
         public ActivityStore() {
             this.set_column_types({typeof (Activity)});
             // this.set_default_sort_func(sort_by_date);
@@ -33,6 +35,10 @@ namespace Activities.Model {
             Gtk.TreeIter iter;
             this.append(out iter);
             this.set_value(iter, 0, activity);
+
+            if (this.serializer != null) {
+                this.serializer.create_activity(activity);
+            }
         }
 
         public void update_record(Activity activity) {
@@ -45,6 +51,10 @@ namespace Activities.Model {
                 }
                 return false;
             });
+
+            if (this.serializer != null) {
+                this.serializer.update_activity(activity);
+            }
         }
 
         public void delete_record(Activity activity) {
@@ -57,6 +67,10 @@ namespace Activities.Model {
                 }
                 return false;
             });
+
+            if (this.serializer != null) {
+                this.serializer.delete_activity(activity);
+            }
         }
     }
 }
