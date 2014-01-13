@@ -35,15 +35,22 @@ namespace Activities.Model {
             this.project_definitions = project_definitions;
         }
 
+        // TODO : use Granite.Services.SettingsSerializable instead
         public void load_projects() {
-            for (int i = 0; i < this.project_definitions.count; i++) {
+            int projects = this.project_definitions.count;
+stdout.printf("Restoring %d projects\n", projects);
+            for (int i = 0; i < projects; i++) {
                 var project_id = this.project_definitions.ids[i];
                 var project_name = this.project_definitions.names[i];
                 var backend_name = this.project_definitions.backends[i];
 
+stdout.printf("  Restoring id=%s, name=%s, backend=%s\n", project_id, project_name, backend_name);
+
                 var backend = new DummyBackend(); // TODO : properly instantiate the class
                 var project = create_project(project_id, project_name, backend);
-                this.add_project(project);
+
+                this.projects.add(project);
+                this.project_added(project);
             }
         }
 
@@ -68,8 +75,32 @@ namespace Activities.Model {
         public void add_project(Project project) {
             if (this.projects.add(project)) {
                 this.project_added(project);
-                // TODO : add it to ProjectDefinitions
+                this.add_project_definition(project);
+                // TODO : monitor changes to Project to *update* the configuration
             }
+        }
+
+        private void add_project_definition(Project new_project) {
+stdout.printf("Storing project id=%s, name=%s, backend=%s\n", new_project.id, new_project.name, new_project.backend.get_type().name());
+
+            var index = this.project_definitions.count;
+            this.project_definitions.count = this.project_definitions.ids.length + 1;
+stdout.printf("  this.project_definitions.count: %d\n", this.project_definitions.count);
+            this.project_definitions.ids = this.append(this.project_definitions.ids, new_project.id);
+stdout.printf("  this.project_definitions.ids: %d\n", this.project_definitions.ids.length);
+            this.project_definitions.names = this.append(this.project_definitions.names, new_project.name);
+stdout.printf("  this.project_definitions.names: %d\n", this.project_definitions.names.length);
+            this.project_definitions.backends = this.append(this.project_definitions.backends, new_project.backend.get_type().name());
+stdout.printf("  this.project_definitions.backends: %d\n", this.project_definitions.backends.length);
+        }
+
+        private string[] append(string[] array, string new_value) {
+            string[] new_array = new string[array.length + 1];
+            for (int i = 0; i < array.length; i++) {
+                new_array[i] = array[i];
+            }
+            new_array[array.length] = new_value;
+            return new_array;
         }
 
         public void remove_project(Project project) {

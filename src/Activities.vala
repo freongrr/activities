@@ -73,9 +73,13 @@ namespace Activities {
             add_window(main_window);
             main_window.show_all();
 
+            this.project_manager.load_projects();
+
             // Add a dummy project
-            var project = this.project_manager.create_project("dummy_project", "Work", new Model.DummyBackend());
-            this.project_manager.add_project(project);
+            if (this.project_manager.projects.size == 0) {
+                var project = this.project_manager.create_project("dummy_project", "Work", new Model.DummyBackend());
+                this.project_manager.add_project(project);
+            }
 
             Gtk.main();
         }
