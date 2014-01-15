@@ -21,7 +21,7 @@
 
 namespace Activities.Model {
 
-    public class DummyBackend : GLib.Object, Backend {
+    public class DummyBackend : Object, Backend {
 
         public string get_id() {
             return "dummy_backend";

@@ -21,7 +21,7 @@
 
 namespace Activities.Model {
 
-    public enum Status {
+    internal enum Status {
         UP_TO_DATE,
         CREATED_LOCALLY,
         UPDATED_LOCALLY,
@@ -30,7 +30,7 @@ namespace Activities.Model {
 
     public class Activity : GLib.Object {
 
-        public Status status { get; set; }
+        internal Status status { get; set; }
 
         internal string local_id { public get; set; }
         internal string? remote_id { public get; set; }

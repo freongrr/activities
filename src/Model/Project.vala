@@ -21,7 +21,7 @@
 
 namespace Activities.Model {
 
-    public class Project : GLib.Object {
+    public class Project : Object {
 
         public string id { get; private set; }
         public string name { get; private set; }
