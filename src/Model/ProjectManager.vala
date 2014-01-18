@@ -83,7 +83,6 @@ stdout.printf("  Restoring id=%s, name=%s, backend=%s\n", project_id, project_na
         private void add_project_definition(Project new_project) {
 stdout.printf("Storing project id=%s, name=%s, backend=%s\n", new_project.id, new_project.name, new_project.backend.get_type().name());
 
-            var index = this.project_definitions.count;
             this.project_definitions.count = this.project_definitions.ids.length + 1;
 stdout.printf("  this.project_definitions.count: %d\n", this.project_definitions.count);
             this.project_definitions.ids = this.append(this.project_definitions.ids, new_project.id);

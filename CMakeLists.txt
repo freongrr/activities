@@ -13,7 +13,7 @@ set (PKGDATADIR "${DATADIR}/activities")
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 add_definitions ("-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"")
 
-set (DEPENDENCIES gtk+-3.0 granite gee-1.0)
+set (DEPENDENCIES gtk+-3.0 granite gee-1.0 libsoup-2.4 json-glib-1.0)
 
 find_package (PkgConfig)
 pkg_check_modules (DEPS REQUIRED ${DEPENDENCIES})
@@ -42,6 +42,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Model/Backend.vala
     src/Model/DummyBackend.vala
     src/Model/DummySerializer.vala
+    src/Model/JIRABackend.vala
     src/Model/ProjectManager.vala
     src/Model/Project.vala
     src/Model/RemoteBackend.vala

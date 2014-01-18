@@ -21,7 +21,7 @@
 
 namespace Activities.Model {
 
-    public interface RemoteBackend : Backend {
+    public abstract class RemoteBackend : Object, Backend {
 
         public void synchronize(ActivityStore activity_store) {
             // TODO : how do I prevent modifications while synchronize
@@ -100,9 +100,16 @@ namespace Activities.Model {
             });
         }
 
+        // TODO : I can't figure out how to make this an abstract implementation of Backend
+        public abstract string get_id();
+        public abstract string get_name();
+        public abstract string get_icon_name();
+        public abstract Gee.Collection<Task> find_tasks(string query);
+
+        // TODO : this one should be async
         protected abstract Gee.Collection<Activity> fetch_activities(int days);
-        protected abstract Gee.Collection<Activity> create_remote_activity(Activity activity);
-        protected abstract Gee.Collection<Activity> update_remote_activity(Activity activity);
-        protected abstract Gee.Collection<Activity> delete_remote_activity(Activity activity);
+        protected abstract void create_remote_activity(Activity activity);
+        protected abstract void update_remote_activity(Activity activity);
+        protected abstract void delete_remote_activity(Activity activity);
     }
 }
