@@ -76,7 +76,15 @@ public class JIRATest : Object {
             Soup.Message message = new Soup.Message("GET", url);
             this.session.send_message(message);
 
-            // TODO : test message.status_code
+            if (message.status_code == Soup.Status.BAD_REQUEST) {
+                // TODO : extract the errorMessages
+                var error_message = (string) message.response_body.data;
+                throw new MyError.REQUEST("Invalid request: %s", error_message);
+            } else if (message.status_code != Soup.Status.OK) {
+                var status_message = Soup.Status.get_phrase(message.status_code);
+                throw new MyError.REQUEST("Bad response: %s", status_message);
+            }
+
             return (string) message.response_body.data;
         } catch (Error e) {
             throw new MyError.REQUEST("Request failed %s", e.message);
@@ -193,8 +201,9 @@ public class JIRATest : Object {
 
     public static int main(string[] args) {
         try {
+            // TODO : prompt for login/password
             var test = new JIRATest();
-            test.search("project = JRA AND updated > \"-7d\"", 0, 10);
+            test.search("updated > \"-7d\"", 0, 10);
 //            test.work_/log("JRA-9");
         } catch (MyError e) {
             stderr.printf("MyError: %s\n", e.message);
