@@ -91,7 +91,6 @@ namespace Activities.View {
             var dummy_store = new Model.ActivityStore();
 
             this.activity_list = new View.ActivityList(dummy_store);
-            this.activity_list.set_size_request(200, -1);
             this.activity_list.get_selection().changed.connect(() => {
                 debug("Selection changed\n");
                 Gtk.TreeModel model;
@@ -116,8 +115,13 @@ namespace Activities.View {
         }
 
         private void layout() {
+            Gtk.ScrolledWindow scroller = new Gtk.ScrolledWindow(null, null);
+            scroller.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+            scroller.set_size_request(200, -1);
+            scroller.add(this.activity_list);
+
             var split_panel = new Granite.Widgets.ThinPaned();
-            split_panel.pack1(this.activity_list, false, true);
+            split_panel.pack1(scroller, false, true);
             split_panel.pack2(this.activity_detail_view, true, false);
 
             var split_split_panel = new Granite.Widgets.ThinPaned();
