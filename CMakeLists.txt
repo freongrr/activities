@@ -43,6 +43,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Model/DummyBackend.vala
     src/Model/DummySerializer.vala
     src/Model/JIRABackend.vala
+    src/Model/JIRADeserializer.vala
     src/Model/ProjectManager.vala
     src/Model/Project.vala
     src/Model/RemoteBackend.vala

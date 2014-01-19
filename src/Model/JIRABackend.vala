@@ -69,18 +69,12 @@ namespace Activities.Model {
         }
 
         protected override Gee.Collection<Activity> fetch_activities(int days) {
-            var tasks = new Gee.LinkedList<Task>();
-            var activities = new Gee.LinkedList<Activity>();
-
             try {
-                this.search("project = 'SP' AND updated > '-7d'", 0, 25, tasks, activities);
+                return this.search("SP", days, 0, 50);
             } catch (Errors e) {
-                error("Error fetching activies: %s", e.message);
+                critical("Error fetching activies: %s", e.message);
+                return new Gee.ArrayList<Activity>();
             }
-
-            // TODO : iter over all the activities to keep the recent ones
-
-            return activities;
         }
 
         protected override void create_remote_activity(Activity activity) {
@@ -97,7 +91,6 @@ namespace Activities.Model {
 
         /* INTERNAL */
 
-
         // I don't like Soup.URI
         private Utils.UrlBuilder api_url() {
             return new Utils.UrlBuilder()
@@ -107,10 +100,8 @@ namespace Activities.Model {
                 .path("rest/api/latest");
         }
 
-        private void search(string predicate, int start_at, int max_results,
-             Gee.Collection<Task> tasks, Gee.Collection<Activity> activities)
-             throws Errors {
-            debug("Searching issues: '%s' %d-%d", predicate, start_at, max_results);
+        private Gee.Collection<Activity> search(string project, int days, int start_at, int max_results) throws Errors {
+            var predicate = "project = '%s' AND updated > '-%dd'".printf(project, days);
 
             var url = this.api_url();
             url.path("search");
@@ -122,7 +113,11 @@ namespace Activities.Model {
             var json = this.http_get(url.to_string());
             var node = this.parse_json(json);
 
-            this.deserialize_search_results(node, tasks, activities);
+            var deserializer = new JIRADeserializer();
+            deserializer.username_filter = this.username;
+            deserializer.deserialize_search_results(node);
+
+            return deserializer.activities;
         }
 
         private string http_get(string url) throws Errors {
@@ -153,184 +148,6 @@ namespace Activities.Model {
             } catch (Error e) {
                 throw new Errors.INVALID_FORMAT("Can't parse response: %s", e.message);
             }
-        }
-
-        private void deserialize_search_results(Json.Node node, Gee.Collection<Task> tasks,
-            Gee.Collection<Activity> activities) throws Errors {
-
-            debug("Deserializing search results");
-            if (node.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Unexpected element type %s", node.type_name());
-            }
-
-            var result_object = node.get_object();
-            this.iterate_on_member(result_object, "issues", (element_node) => {
-                try {
-                    var task = this.deserialize_issue(element_node, activities);
-                    tasks.add(task);
-                } catch (Errors e) {
-                    warning("Could not deserialize worklog %s", e.message);
-                }
-            });
-        }
-
-        private Task deserialize_issue(Json.Node node, Gee.Collection<Activity> activities) throws Errors {
-            debug("Deserializing issue");
-            if (node.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Unexpected element type %s", node.type_name());
-            }
-
-            // TODO : test if the fields exist (or wrap that in a function that throws errors)
-
-            var issue = node.get_object();
-            var fields = issue.get_object_member("fields");
-
-            // TODO : what do we use for the local id?
-            var task = new Task(issue.get_string_member("id"));
-            task.remote_id = issue.get_string_member("id");
-            task.key = issue.get_string_member("key");
-            task.description = fields.get_string_member("summary");
-            // TODO : closed flag?
-
-            if (fields.has_member("worklog")) {
-                var worklog = fields.get_member("worklog");
-
-                var task_activities = new Gee.LinkedList<Activity>();
-                this.deserialize_worklogs(worklog, task_activities);
-
-                debug("Task has %d activities", task_activities.size);
-                foreach (var activity in task_activities) {
-                    activity.task = task;
-                    activities.add(activity);
-                }
-            }
-
-            return task;
-        }
-
-        private void deserialize_worklogs(Json.Node node, Gee.Collection<Activity> activities) throws Errors {
-            debug("Deserializing worklog wrapper: %s", node == null ? "NULL" : node.type_name());
-
-            if (node.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Unexpected element type %s", node.type_name());
-            }
-
-            var wrapper = node.get_object();
-            this.iterate_on_member(wrapper, "worklogs", (element_node) => {
-                try {
-                    var activity = this.deserialize_worklog(element_node);
-                    if (activity != null) {
-                        activities.add(activity);
-                    }
-                } catch (Errors e) {
-                    warning("Could not deserialize worklog %s", e.message);
-                }
-            });
-        }
-
-        private Activity? deserialize_worklog(Json.Node node) throws Errors {
-            debug("Deserializing worklog");
-            if (node.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Unexpected element type %s", node.type_name());
-            }
-
-            // TODO : test if the members exist
-
-            var worklog = node.get_object();
-            var author = worklog.get_member("author").get_object();
-            var author_name = author.get_string_member("name");
-
-            // Only keep worklog for the current user
-            if (author_name != this.username) {
-                return null;
-            }
-
-            var remote_id = worklog.get_string_member("id");
-            var comment = worklog.get_string_member("comment");
-            var started = worklog.get_string_member("started");
-
-            ulong seconds = 0;
-            if (worklog.get_string_member("timeSpentSeconds") != null) {
-                var second_str = worklog.get_string_member("timeSpentSeconds");
-                seconds = long.parse(second_str);
-            } else {
-                var time_str = worklog.get_string_member("timeSpent");
-                seconds = this.parse_time(time_str);
-            }
-
-            var start_time = GLib.TimeVal();
-            start_time.from_iso8601(started);
-
-            var end_time = start_time;
-            end_time.add((long) seconds * 1000 * 1000);
-
-            // TODO : less than ideal...
-            var local_id = remote_id;
-
-            var activity = new Activity(local_id);
-            activity.remote_id = remote_id;
-            activity.description = comment ?? "";
-            activity.start_date = new DateTime.from_timeval_local(start_time);
-            activity.end_date = new DateTime.from_timeval_local(end_time);
-            return activity;
-        }
-
-        /* Even more internal... */
-
-        delegate void iterate_func(Json.Node element_node);
-
-        private void iterate_on_member(Json.Object object, string member_name, iterate_func function) {
-            if (!object.has_member(member_name)) {
-                warning("Object has no member called '%s'", member_name);
-                return;
-            }
-
-            var member = object.get_member(member_name);
-            if (member.get_node_type () != Json.NodeType.ARRAY) {
-                warning("Member '%s' is not an array: %s", member_name, member.type_name());
-                return;
-            }
-
-            var array = member.get_array();
-            array.foreach_element((array, index, element_node) => {
-                function(element_node);
-            });
-        }
-
-        // TODO : regexps?
-        private ulong parse_time(string time) {
-            debug("parsing '%s'", time);
-            int n = 0;
-            char c = 'z';
-            ulong total = 0;
-            foreach (var part in time.split(" ")) {
-                if (part.scanf("%d%c", &n, &c) == 2) {
-                    switch (c) {
-                    case 'w':
-                        total += ((long) n * 60 * 60 * 24 * 7);
-                        break;
-                    case 'd':
-                        total += ((long) n * 60 * 60 * 24);
-                        break;
-                    case 'h':
-                        total += ((long) n * 60 * 60);
-                        break;
-                    case 'm':
-                        total += ((long) n * 60);
-                        break;
-                    case 's':
-                        total += n;
-                        break;
-                    default:
-                        warning("Unexpected part: %s", part);
-                        break;
-                    }
-                } else {
-                    warning("Unexpected part: %s", part);
-                }
-            }
-            debug("total=" + total.to_string());
-            return total;
         }
 
         /* TESTING */

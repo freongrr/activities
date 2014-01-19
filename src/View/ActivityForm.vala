@@ -25,13 +25,13 @@ namespace Activities.View {
 
         public signal void changed(Model.Activity activity);
 
-        public Model.Activity activity {
+        public Model.Activity? activity {
             get {
                 return this._activity;
             }
 
             set {
-                this._activity = new Model.Activity.copy_from(value);
+                this._activity = value == null ? null : new Model.Activity.copy_from(value);
                 this.update_view();
             }
         }
@@ -107,21 +107,43 @@ namespace Activities.View {
         }
 
         private void on_changed() {
+            if (this._activity == null) {
+                return;
+            }
+
             this._activity.description = this.description_entry.text;
             this._activity.start_date = this.start_picker.date_time;
             this._activity.end_date = this.end_picker.date_time;
             // TODO : other attributes
 
-            stdout.printf("Activity changed: %s\n", this._activity.to_string());
+            debug("Activity changed: %s", this._activity.to_string());
+            // TODO : this.changed(etc);
         }
 
         private void update_view() {
-            this.task_entry.text = this._activity.task.key + " - " + this._activity.task.description;
-            this.description_entry.text = this._activity.description;
-            this.tags_entry.text = this.get_tags_as_string();
-            this.start_picker.date_time = this._activity.start_date;
-            this.end_picker.date_time = this._activity.end_date;
-            this.notes_text_view.buffer.text = this._activity.task.notes;
+            var enabled = this._activity != null;
+            this.task_entry.sensitive = enabled;
+            this.description_entry.sensitive = enabled;
+            this.tags_entry.sensitive = enabled;
+            this.start_picker.sensitive = enabled;
+            this.end_picker.sensitive = enabled;
+            this.notes_text_view.sensitive = enabled;
+
+            if (this._activity == null) {
+                this.task_entry.text = "";
+                this.description_entry.text = "";
+                this.tags_entry.text = "";
+                this.start_picker.date_time = null;
+                this.end_picker.date_time = null;
+                this.notes_text_view.buffer.text = "";
+            } else {
+                this.task_entry.text = this._activity.task.key + " - " + this._activity.task.description;
+                this.description_entry.text = this._activity.description;
+                this.tags_entry.text = this.get_tags_as_string();
+                this.start_picker.date_time = this._activity.start_date;
+                this.end_picker.date_time = this._activity.end_date;
+                this.notes_text_view.buffer.text = this._activity.task.notes;
+            }
         }
 
         private string get_tags_as_string() {
