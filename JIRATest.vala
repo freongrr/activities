@@ -38,6 +38,7 @@ namespace Activities.Model {
             this.base_uri = new Soup.URI(uri);
 
             this.session = new Soup.Session();
+            this.session.timeout = 10;
 
             var logger = new Soup.Logger(Soup.LoggerLogLevel.BODY, -1);
             this.session.add_feature(logger);
@@ -50,9 +51,13 @@ namespace Activities.Model {
             this.session.add_feature(auth_manager);
         }
 
-        // TODO : use Soup.URI instead
+        // I don't like Soup.URI
         private UrlBuilder api_url() {
-            return new UrlBuilder().protocol("http").host("jira.dev.tradingscreen.com").port(8080).path("rest/api/latest");
+            return new UrlBuilder()
+                .protocol(this.base_uri.scheme)
+                .host(this.base_uri.host)
+                .port(this.base_uri.port)
+                .path("rest/api/latest");
         }
 
         private void search(string predicate, int start_at, int max_results) throws MyError {

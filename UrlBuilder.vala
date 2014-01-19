@@ -24,7 +24,7 @@ internal class UrlBuilder : Object {
     private StringBuilder buffer;
     private string? _protocol;
     private string? _host;
-    private int? _port;
+    private uint? _port;
     private bool has_query_string = false;
 
     internal UrlBuilder() {
@@ -64,7 +64,7 @@ internal class UrlBuilder : Object {
         return this;
     }
 
-    internal UrlBuilder port(int port) {
+    internal UrlBuilder port(uint port) {
         this._port = port;
         return this;
     }
