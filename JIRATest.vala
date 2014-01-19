@@ -29,10 +29,12 @@ namespace Activities.Model {
 
         private static const string DEFAULT_LOCATION = "http://jira.dev.tradingscreen.com:8080";
 
+        private string username;
         private Soup.URI base_uri;
         private Soup.Session session;
 
         public JIRATest(string uri, string username, string password) {
+            this.username = username;
             this.base_uri = new Soup.URI(uri);
 
             this.session = new Soup.Session();
@@ -181,13 +183,22 @@ namespace Activities.Model {
             var remote_id = worklog.get_string_member("id");
             var comment = worklog.get_string_member("comment");
             var started = worklog.get_string_member("started");
+            var time = worklog.get_string_member("timeSpent");
             var seconds = worklog.get_string_member("timeSpentSeconds");
 
-            stdout.printf("--- Activity ---\n");
-            stdout.printf("id: %s\n", remote_id);
-            stdout.printf("comment: %s\n", comment);
-            stdout.printf("started: %s\n", started);
-            stdout.printf("seconds: %s\n", seconds);
+            var author = worklog.get_member("author").get_object();
+            var author_name = author.get_string_member("name");
+            var author_display_name = author.get_string_member("name");
+
+            if (author_name == this.username) {
+                stdout.printf("--- Activity ---\n");
+                stdout.printf("id: %s\n", remote_id);
+                stdout.printf("author: %s\n", author_display_name);
+                stdout.printf("comment: %s\n", comment);
+                stdout.printf("started: %s\n", started);
+                stdout.printf("time: %s\n", time);
+                stdout.printf("seconds: %s\n", seconds);
+            }
         }
 
         public static int main(string[] args) {
@@ -199,13 +210,14 @@ namespace Activities.Model {
                 string password = prompt("Pasword", "", false);
 
                 var test = new JIRATest(location, username, password);
-                //test.search("updated > \"-7d\"", 0, 10);
-                test.search("key = \"SP-3214\"", 0, 99);
+                test.search("project = 'SP' AND updated > '-7d'", 0, 25);
+                // test.search("key = \"SP-3214\"", 0, 99);
             } catch (MyError e) {
                 stderr.printf("MyError: %s\n", e.message);
             } catch (Error e) {
                 stderr.printf("Error: %s\n", e.message);
             }
+
             return 0;
         }
 
