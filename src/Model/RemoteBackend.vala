@@ -58,7 +58,7 @@ namespace Activities.Model {
             debug("[%s] Fetching remote changes", get_id());
             // If we already asked we only need to get the most recent changes
             if (activity_store.last_synchronization == null) {
-                return this.fetch_activities(7 /* TODO : should be driven by a parameter of the Project/Backend */);
+                return this.fetch_activities(30 /* TODO : should be driven by a parameter of the Project/Backend */);
             } else {
                 // TODO : pass a date time?
                 return this.fetch_activities(1);

@@ -70,7 +70,7 @@ namespace Activities.Model {
 
         protected override Gee.Collection<Activity> fetch_activities(int days) {
             try {
-                return this.search("SP", days, 0, 50);
+                return this.search("SP", days, 0, 99);
             } catch (Errors e) {
                 critical("Error fetching activies: %s", e.message);
                 return new Gee.ArrayList<Activity>();
