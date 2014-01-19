@@ -81,6 +81,9 @@ stdout.printf("  Restoring id=%s, name=%s, backend=%s\n", project_id, project_na
         }
 
         private void add_project_definition(Project new_project) {
+            // Disabling for now, as I can't save the username/password
+            return;
+
 stdout.printf("Storing project id=%s, name=%s, backend=%s\n", new_project.id, new_project.name, new_project.backend.get_type().name());
 
             this.project_definitions.count = this.project_definitions.ids.length + 1;

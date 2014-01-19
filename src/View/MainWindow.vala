@@ -23,8 +23,28 @@ namespace Activities.View {
 
     public class MainWindow : Gtk.Window {
 
-        public signal void selected(Model.Activity? activity);
-        public signal void changed(Model.Activity activity);
+        public signal void project_selected(Model.Project? project);
+        public signal void activity_selected(Model.Activity? activity);
+        public signal void activity_updated(Model.Activity activity);
+
+        public Model.Project visible_project {
+            get {
+                return _project;
+            }
+
+            set {
+                this._project = value;
+                if (value == null) {
+                    // TODO !
+                    debug("Showing project: NULL\n");
+                    this.activity_list.model = new Model.ActivityStore();
+                } else {
+                    debug("Showing project: %s\n", value.name);
+                    this.activity_list.model = value.store;
+                }
+                this.project_selected(value);
+            }
+        }
 
         public Model.Activity visible_activity {
             get {
@@ -40,6 +60,7 @@ namespace Activities.View {
         private Granite.Widgets.SourceList project_list;
         private View.ActivityList activity_list;
         private ActivityDetailView activity_detail_view;
+        private Model.Project _project;
 
         public MainWindow(string title) {
             this.title = title;
@@ -59,7 +80,7 @@ namespace Activities.View {
 
             // HACK - this is just to see it on the screen
             var local_item = new Granite.Widgets.SourceList.ExpandableItem("Local");
-            var trash_item = new Granite.Widgets.SourceList.Item ("Trash");
+            var trash_item = new Granite.Widgets.SourceList.Item("Trash");
             local_item.add(trash_item);
 
             this.project_list.root.add(local_item);
@@ -72,17 +93,17 @@ namespace Activities.View {
             this.activity_list = new View.ActivityList(dummy_store);
             this.activity_list.set_size_request(200, -1);
             this.activity_list.get_selection().changed.connect(() => {
-                stdout.printf("Selection changed\n");
+                debug("Selection changed\n");
                 Gtk.TreeModel model;
                 Gtk.TreeIter iter;
                 if (this.activity_list.get_selection().get_selected(out model, out iter)) {
                     GLib.Value v;
                     this.activity_list.model.get_value(iter, 0, out v);
-                    stdout.printf("Selection => %s\n", ((Model.Activity) v).to_string());
-                    this.selected((Model.Activity) v);
+                    debug("Selection => %s\n", ((Model.Activity) v).to_string());
+                    this.activity_selected((Model.Activity) v);
                 } else {
-                    stdout.printf("Selection => NULL\n");
-                    this.selected(null);
+                    debug("Selection => NULL\n");
+                    this.activity_selected(null);
                 }
             });
         }
@@ -90,7 +111,7 @@ namespace Activities.View {
         private void create_activity_detail_view() {
             this.activity_detail_view = new ActivityDetailView();
             this.activity_detail_view.changed.connect((a) => {
-                this.changed(a);
+                this.activity_updated(a);
             });
         }
 
@@ -128,15 +149,20 @@ namespace Activities.View {
         }
 
         public void add_project(Model.Project project) {
-            var parent_item = this.get_backend_parent_item(project);
-
             // TODO : icons
             var project_item = new Granite.Widgets.SourceList.Item(project.name);
+
+            var parent_item = this.get_backend_parent_item(project);
             parent_item.add(project_item);
 
-            // TODO : this is just a test. this should be done when the selection changes
-            // TODO : how do I show multiple projects?
-            this.activity_list.model = project.store;
+            this.project_list.item_selected.connect((item) => {
+                if (item == project_item) {
+                    this.visible_project = project;
+                }
+            });
+
+            // Show the most recent project
+            this.visible_project = project;
         }
 
         public void remove_project(Model.Project project) {

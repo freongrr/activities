@@ -22,12 +22,15 @@
 namespace Activities {
 
     namespace CommandLineOption {
-        private static bool PRINT_VERSION = false;
+        private static bool VERSION = false;
     }
 
     public class Application : Granite.Application {
 
         construct {
+            Granite.Services.Logger.initialize("Activities");
+            Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.DEBUG;
+
             this.build_data_dir = Build.DATADIR;
             this.build_pkg_data_dir = Build.PKGDATADIR;
             this.build_release_name = Build.RELEASE_NAME;
@@ -77,9 +80,15 @@ namespace Activities {
 
             // Add a dummy project
             if (this.project_manager.projects.size == 0) {
-                var project = this.project_manager.create_project("dummy_project", "Work", new Model.DummyBackend());
-                this.project_manager.add_project(project);
+                var jira_backend = Model.JIRABackend.get_default();
+                var jira_project = this.project_manager.create_project("jira_project", "Project 1", jira_backend);
+                this.project_manager.add_project(jira_project);
+
+                var local_project = this.project_manager.create_project("dummy_project", "Work", new Model.DummyBackend());
+                this.project_manager.add_project(local_project);
             }
+
+            // TODO : synchronize
 
             Gtk.main();
         }
@@ -90,14 +99,12 @@ namespace Activities {
             this.main_window.delete_event.connect((e) => { update_saved_state(); return false; });
 
             // TODO : this could stay a pure view thing I could not care about
-            this.main_window.selected.connect((a) => {
+            this.main_window.activity_selected.connect((a) => {
                 this.main_window.visible_activity = a;
             });
 
-            this.main_window.changed.connect((a) => {
-                // TODO : how do I find the selected project/backend?
-//                backend.update_activity(a);
-//                backend.synchronize();
+            this.main_window.activity_updated.connect((a) => {
+                // TODO : update the store here or in the view?
             });
 
             // TODO : is there no better way to register shortcuts???
@@ -160,9 +167,17 @@ namespace Activities {
         private void create_toolbar() {
             View.AppToolbar toolbar = new View.AppToolbar();
             toolbar.title = this.program_name;
-            toolbar.subtitle = "Keep track of your time";
+            this.main_window.project_selected.connect((p) => {
+                debug("Project selected: %s", p == null ? "NULL" : p.name);
+                if (p == null) {
+                    toolbar.subtitle = "No project selected";
+                } else {
+                    toolbar.subtitle = p.name;
+                }
+            });
 
             // TODO
+            toolbar.synchronize_button.clicked.connect(() => this.on_synchronize_activities());
             toolbar.new_button.clicked.connect(() => this.on_new_activity());
             toolbar.resume_button.clicked.connect(() => stdout.printf("Resume button clicked\n"));
             toolbar.stop_button.clicked.connect(() => stdout.printf("Stop button clicked\n"));
@@ -170,12 +185,19 @@ namespace Activities {
             toolbar.menu.about.activate.connect(() => show_about(main_window));
 
             this.main_window.set_titlebar(toolbar);
-            this.main_window.selected.connect((a) => {
+            this.main_window.activity_selected.connect((a) => {
                 // TODO : test the status (e.g. the activity is started/finished)
                 toolbar.resume_button.sensitive = (a != null);
                 toolbar.stop_button.sensitive = (a != null);
                 toolbar.delete_button.sensitive = (a != null);
             });
+        }
+
+        private void on_synchronize_activities() {
+            foreach (var project in this.project_manager.projects) {
+                debug("Synchronizing %s...", project.name);
+                project.backend.synchronize(project.store);
+            }
         }
 
         private void on_new_activity() {
@@ -199,7 +221,7 @@ namespace Activities {
             warning(e.message);
         }
 
-        if (CommandLineOption.PRINT_VERSION) {
+        if (CommandLineOption.VERSION) {
             stdout.printf("Activities %s\n", Build.VERSION);
             stdout.printf("Copyright 2013 Fabien Cortina.\n");
             return 0;
@@ -212,7 +234,7 @@ namespace Activities {
     }
 
     private static const OptionEntry[] command_line_options = {
-        { "version", 'v', 0, OptionArg.NONE, out CommandLineOption.PRINT_VERSION, "Print version info and exit", null },
+        { "version", 'v', 0, OptionArg.NONE, out CommandLineOption.VERSION, "Print version info and exit", null },
         { null }
     };
 }
