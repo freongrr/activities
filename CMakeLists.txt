@@ -25,13 +25,16 @@ link_directories (${DEPS_LIBRARY_DIRS})
 find_package (Vala REQUIRED)
 include (ValaVersion)
 include (ValaPrecompile)
-ensure_vala_version ("0.16" MINIMUM)
+ensure_vala_version ("0.20" MINIMUM)
 
-SET(VALA_COMPILE_FLAGS "--enable-experimental-non-null")
+# TODO : enable that
+#SET(VALA_COMPILE_FLAGS "--enable-experimental-non-null")
 #SET(VALA_COMPILE_FLAGS --enable-checking --fatal-warnings)
 #SET(VALA_COMPILE_FLAGS_DEBUG -X -ggdb3)
 
 configure_file (${CMAKE_SOURCE_DIR}/src/config.vala.cmake ${CMAKE_SOURCE_DIR}/src/config.vala)
+
+link_libraries (m)
 
 # files we want to compile
 vala_precompile (VALA_C ${EXEC_NAME}
@@ -52,16 +55,15 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Settings/ProjectDefinitions.vala
     src/Settings/SavedState.vala
     src/Utils/UrlBuilder.vala
+    src/View/ActivityCellRenderer.vala
     src/View/ActivityForm.vala
-    src/View/ActivityListRenderer.vala
     src/View/ActivityList.vala
     src/View/AppMenu.vala
     src/View/AppToolbar.vala
     src/View/DateTimePicker.vala
     src/View/MainWindow.vala
-# tell what libraries to use when compiling
-PACKAGES
-    ${DEPENDENCIES}
+    PACKAGES ${DEPENDENCIES}
+    OPTIONS ${VALA_COMPILE_FLAGS}
 )
 
 add_executable (${EXEC_NAME} ${VALA_C})

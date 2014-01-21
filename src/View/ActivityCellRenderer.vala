@@ -88,12 +88,11 @@ namespace Activities.View {
         private void render_time(Model.Activity activity) {
             string text = "NULL";
             if (activity != null && activity.task != null) {
-                if (activity.end_date != null) {
-                    // TODO : show the duration instead?
-                    text = this.to_short_time_string(activity.start_date) +
-                           " - " + this.to_short_time_string(activity.end_date);
+                text = this.time_to_string(activity.start_date);
+                if (activity.end_date == null) {
+                    text += " (" + this.duration_to_string(activity.end_date, new DateTime.now_local()) + ")";
                 } else {
-                    text = this.to_short_time_string(activity.start_date) + " - now";
+                    text += " (" + this.duration_to_string(activity.end_date, activity.start_date) + ")";
                 }
             }
 
@@ -120,8 +119,53 @@ namespace Activities.View {
             Pango.cairo_show_layout(this.context, layout);
         }
 
-        private string to_short_time_string(GLib.DateTime date_time) {
-            return "%d:%02d".printf(date_time.get_hour(), date_time.get_minute());
+        private string time_to_string(GLib.DateTime date_time) {
+            // TODO : local?
+            var today = new DateTime.now_local();
+            if (today.get_year() == date_time.get_year() &&
+                today.get_month() == date_time.get_month() &&
+                today.get_day_of_month() == date_time.get_day_of_month()) {
+                return "%d:%02d".printf(date_time.get_hour(), date_time.get_minute());
+            } else {
+                TimeSpan diff = today.difference(date_time);
+                if (diff < TimeSpan.DAY * 7) {
+                    // TODO : there has to be a better way of doing that
+                    switch (date_time.get_day_of_week()) {
+                        case 1: return "Monday";
+                        case 2: return "Tuesday";
+                        case 3: return "Wednesday";
+                        case 4: return "Thursday";
+                        case 5: return "Friday";
+                        case 6: return "Saturdat";
+                        case 7: return "Sunday";
+                    }
+                }
+            }
+            return "%04d-%02d-%02d %02d:%02d".printf(date_time.get_year(), date_time.get_month(),
+                date_time.get_day_of_month(), date_time.get_hour(), date_time.get_minute());
+        }
+
+        private string duration_to_string(GLib.DateTime end_time, GLib.DateTime start_time) {
+            TimeSpan diff = end_time.difference(start_time);
+            // TODO : not pretty
+            var builder = new StringBuilder();
+            if (diff > TimeSpan.HOUR) {
+                int hours = (int) Math.floor(diff / TimeSpan.HOUR);
+                if (builder.len > 0) {
+                    builder.append(" ");
+                }
+                builder.append("%dh".printf(hours));
+                diff = diff - hours * TimeSpan.HOUR;
+            }
+            if (diff > TimeSpan.MINUTE) {
+                int minutes = (int) Math.floor(diff / TimeSpan.MINUTE);
+                if (builder.len > 0) {
+                    builder.append(" ");
+                }
+                builder.append("%dm".printf(minutes));
+                diff = diff - minutes * TimeSpan.MINUTE;
+            }
+            return builder.str;
         }
 
         private void render_task(Model.Activity activity) {

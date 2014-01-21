@@ -182,26 +182,26 @@ namespace Activities.Model {
         // TODO : regexps?
         private ulong parse_time(string time) {
             debug("parsing '%s'", time);
-            int n = 0;
+            float n = 0;
             char c = 'z';
             ulong total = 0;
             foreach (var part in time.split(" ")) {
-                if (part.scanf("%d%c", &n, &c) == 2) {
+                if (part.scanf("%f%c", &n, &c) == 2) {
                     switch (c) {
                     case 'w':
-                        total += ((long) n * 60 * 60 * 24 * 7);
+                        total += (uint) (n * 60 * 60 * 24 * 7);
                         break;
                     case 'd':
-                        total += ((long) n * 60 * 60 * 24);
+                        total += (uint) (n * 60 * 60 * 24);
                         break;
                     case 'h':
-                        total += ((long) n * 60 * 60);
+                        total += (uint) (n * 60 * 60);
                         break;
                     case 'm':
-                        total += ((long) n * 60);
+                        total += (uint) (n * 60);
                         break;
                     case 's':
-                        total += n;
+                        total += (uint) n;
                         break;
                     default:
                         warning("Unexpected part: %s", part);

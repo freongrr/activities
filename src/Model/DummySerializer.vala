@@ -62,8 +62,8 @@ namespace Activities.Model {
                 activity = new Model.Activity("a3");
                 activity.description = "Bug fixing";
                 activity.task = task;
-                activity.start_date = new DateTime.local(2013, 12, 24, 8, 45, 0);
-                activity.end_date = new DateTime.local(2013, 12, 24, 17, 15, 0);
+                activity.start_date = new DateTime.local(2013, 12, 24, 9, 15, 0);
+                activity.end_date = new DateTime.local(2013, 12, 24, 10, 30, 0);
                 this.activities.add(activity);
             }
         }
