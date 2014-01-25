@@ -23,7 +23,7 @@ namespace Activities.View {
 
     internal class ActivityDetailView : Gtk.Box {
 
-        public signal void changed(Model.Activity activity);
+        public signal void changed();
 
         public Model.Activity? activity {
             get {
@@ -31,8 +31,15 @@ namespace Activities.View {
             }
 
             set {
-                this._activity = value == null ? null : new Model.Activity.copy_from(value);
-                this.update_view();
+                if (value == null) {
+                    this._activity = null;
+                    debug("Setting activity: NULL");
+                    this.update_view();
+                } else {
+                    this._activity = new Model.Activity.copy_from(value);
+                    debug("Setting activity: %s", this._activity.to_string());
+                    this.update_view();
+                }
             }
         }
 
@@ -43,26 +50,50 @@ namespace Activities.View {
         private DateTimePicker end_picker;
         private Gtk.TextView notes_text_view;
 
-        private Model.Activity _activity;
+        private Model.Activity? _activity;
 
         internal ActivityDetailView() {
             this.task_entry = new Gtk.Entry();
-            this.task_entry.changed.connect(this.on_changed);
+            this.task_entry.changed.connect(() => {
+                // TODO : can the task be changed?
+            });
 
             this.description_entry = new Gtk.Entry();
-            this.description_entry.changed.connect(this.on_changed);
+            this.description_entry.changed.connect(() => {
+                if (this._activity != null && this._activity.description != this.description_entry.text) {
+                    this._activity.description = this.description_entry.text;
+                    debug("Description changed: %s", this._activity.description);
+                    this.changed();
+                }
+            });
 
             this.start_picker = new DateTimePicker();
-            this.start_picker.date_time_changed.connect(this.on_changed);
+            this.start_picker.date_time_changed.connect(() => {
+                if (this._activity != null && this._activity.start_date != this.start_picker.date_time) {
+                    this._activity.start_date = this.start_picker.date_time;
+                    debug("Start date changed: %s", this._activity.start_date.to_string());
+                    this.changed();
+                }
+            });
 
             this.end_picker = new DateTimePicker();
-            this.end_picker.date_time_changed.connect(this.on_changed);
+            this.end_picker.date_time_changed.connect(() => {
+                if (this._activity != null && this._activity.end_date != this.end_picker.date_time) {
+                    this._activity.end_date = this.end_picker.date_time;
+                    debug("End date changed: %s", this._activity.end_date.to_string());
+                    this.changed();
+                }
+            });
 
             this.tags_entry = new Gtk.Entry();
-            this.tags_entry.changed.connect(this.on_changed);
+            this.tags_entry.changed.connect(() => {
+                // TODO
+            });
 
             this.notes_text_view = new Gtk.TextView();
-            this.notes_text_view.buffer.changed.connect(this.on_changed);
+            this.notes_text_view.buffer.changed.connect(() => {
+                // TODO
+            });
 
             this.layout();
         }
@@ -106,37 +137,33 @@ namespace Activities.View {
             return frame;
         }
 
-        private void on_changed() {
-            if (this._activity == null) {
-                return;
-            }
-
-            this._activity.description = this.description_entry.text;
-            this._activity.start_date = this.start_picker.date_time;
-            this._activity.end_date = this.end_picker.date_time;
-            // TODO : other attributes
-
-            debug("Activity changed: %s", this._activity.to_string());
-            // TODO : this.changed(etc);
-        }
-
         private void update_view() {
-            var enabled = this._activity != null;
-            this.task_entry.sensitive = enabled;
-            this.description_entry.sensitive = enabled;
-            this.tags_entry.sensitive = enabled;
-            this.start_picker.sensitive = enabled;
-            this.end_picker.sensitive = enabled;
-            this.notes_text_view.sensitive = enabled;
-
             if (this._activity == null) {
+                debug("Update view -> clearing fields");
+
+                this.task_entry.sensitive = false;
+                this.description_entry.sensitive = false;
+                this.tags_entry.sensitive = false;
+                this.start_picker.sensitive = false;
+                this.end_picker.sensitive = false;
+                this.notes_text_view.sensitive = false;
+
                 this.task_entry.text = "";
                 this.description_entry.text = "";
                 this.tags_entry.text = "";
-                this.start_picker.date_time = null;
-                this.end_picker.date_time = null;
+                this.start_picker.date_time = new DateTime.now_local();
+                this.end_picker.date_time = new DateTime.now_local();
                 this.notes_text_view.buffer.text = "";
             } else {
+                debug("Update view -> %s", this._activity.to_string());
+
+                this.task_entry.sensitive = true;
+                this.description_entry.sensitive = true;
+                this.tags_entry.sensitive = true;
+                this.start_picker.sensitive = true;
+                this.end_picker.sensitive = true;
+                this.notes_text_view.sensitive = true;
+
                 this.task_entry.text = this._activity.task.key + " - " + this._activity.task.description;
                 this.description_entry.text = this._activity.description;
                 this.tags_entry.text = this.get_tags_as_string();

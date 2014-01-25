@@ -46,11 +46,10 @@ namespace Activities.View {
             }
         }
 
-        public Model.Activity visible_activity {
+        public Model.Activity? visible_activity {
             get {
                 return this.activity_detail_view.activity;
             }
-
             set {
                 this.activity_detail_view.activity = value;
                 this.select_activity(value);
@@ -109,8 +108,8 @@ namespace Activities.View {
 
         private void create_activity_detail_view() {
             this.activity_detail_view = new ActivityDetailView();
-            this.activity_detail_view.changed.connect((a) => {
-                this.activity_updated(a);
+            this.activity_detail_view.changed.connect(() => {
+                this.activity_updated(activity_detail_view.activity);
             });
         }
 
@@ -120,7 +119,9 @@ namespace Activities.View {
             scroller.set_size_request(200, -1);
             scroller.add(this.activity_list);
 
-            var split_panel = new Granite.Widgets.ThinPaned();
+            // TODO : make the orientation a parmeter
+            // TODO : when VERTICAL, the detail panel must be smaller
+            var split_panel = new Granite.Widgets.ThinPaned(Gtk.Orientation.HORIZONTAL);
             split_panel.pack1(scroller, false, true);
             split_panel.pack2(this.activity_detail_view, true, false);
 
@@ -130,22 +131,24 @@ namespace Activities.View {
             this.add(split_split_panel);
         }
 
-        private void select_activity(Model.Activity activity) {
-            bool found = false;
+        private void select_activity(Model.Activity? activity) {
             var selection = this.activity_list.get_selection();
 
-            this.activity_list.model.@foreach((model, path, iter) => {
-                GLib.Value v;
-                this.activity_list.model.get_value(iter, 0, out v);
-                if (v == activity) {
-                    found = true;
-                    if (!selection.iter_is_selected(iter)) {
-                        selection.select_iter(iter);
+            bool found = false;
+            if (activity != null) {
+                this.activity_list.model.@foreach((model, path, iter) => {
+                    GLib.Value v;
+                    this.activity_list.model.get_value(iter, 0, out v);
+                    if (v == activity) {
+                        found = true;
+                        if (!selection.iter_is_selected(iter)) {
+                            selection.select_iter(iter);
+                        }
+                        return true;
                     }
-                    return true;
-                }
-                return false;
-            });
+                    return false;
+                });
+            }
 
             if (!found) {
                 selection.unselect_all();
