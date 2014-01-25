@@ -24,32 +24,12 @@ namespace Activities.Model {
     // TODO : interface
     public class ActivityStore : Gtk.ListStore {
 
-        internal Serializer serializer;
+        internal Serializer? serializer;
         internal DateTime? last_synchronization;
 
         public ActivityStore() {
             this.set_column_types({typeof (Activity)});
             this.set_default_sort_func(sort_by_date);
-/*
-            this.set_default_sort_func((model, TreeIter iter_a, iter_b) => {
-                GLib.Value value_a;
-                this.get_value(iter_a, 0, out value_a);
-
-                GLib.Value value_b;
-                this.get_value(iter_b, 0, out value_b);
-
-                var start_date_a = ((Activity) value_a).start_time;
-                var start_date_b = ((Activity) value_b).start_time;
-
-                if (start_date_a == null) {
-                    return start_date_b == null ? 0 : -1;
-                } else if (start_date_b == null) {
-                    return 1;
-                } else {
-                    return start_date_a.compare_to(start_date_b);
-                }
-            });
-*/
             this.set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
         }
 

@@ -63,7 +63,7 @@ namespace Activities.Model {
             return "Activity {status=%s, local_id=%s, remote_id=%s, description=%s, task=%s, start_date=%s, end_date=%s, tags=%d}".printf(
                 this.status.to_string(),
                 this.local_id,
-                this.remote_id,
+                this.remote_id ?? "(null)",
                 this.description,
                 this.task == null ? "(null)" : this.task.to_string(),
                 this.start_date == null ? "(null)" : this.start_date.to_string(),

@@ -87,7 +87,7 @@ namespace Activities.View {
 
         private void render_time(Model.Activity activity) {
             string text = "NULL";
-            if (activity != null && activity.task != null) {
+            if (activity != null && activity.start_date != null) {
                 text = this.time_to_string(activity.start_date);
                 if (activity.end_date == null) {
                     text += " (" + this.duration_to_string(activity.end_date, new DateTime.now_local()) + ")";
