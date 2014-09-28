@@ -73,12 +73,15 @@ namespace Activities.Model {
         }
 
         internal void create_activity(Activity activity) {
+            message("NOOP - Storing a new activity: %s", activity.to_string());
         }
 
         internal void update_activity(Activity activity) {
+            message("NOOP - Storing an updated activity: %s", activity.to_string());
         }
 
         internal void delete_activity(Activity activity) {
+            message("NOOP - Deleting an activity: %s", activity.to_string());
         }
     }
 }

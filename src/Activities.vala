@@ -80,11 +80,12 @@ namespace Activities {
 
             // Add a dummy project
             if (this.project_manager.projects.size == 0) {
-                var jira_backend = Model.JIRABackend.get_default();
-                var jira_project = this.project_manager.create_project("jira_project", "Project 1", jira_backend);
-                this.project_manager.add_project(jira_project);
+//                var jira_backend = Model.JIRABackend.get_default();
+//                var jira_project = this.project_manager.create_project("jira_project", "Project 1", jira_backend);
+//                this.project_manager.add_project(jira_project);
 
-                var local_project = this.project_manager.create_project("dummy_project", "Work", new Model.DummyBackend());
+                var dummy_backend = new Model.DummyBackend();
+                var local_project = this.project_manager.create_project("dummy_project", "Work", dummy_backend);
                 this.project_manager.add_project(local_project);
             }
 
@@ -105,6 +106,10 @@ namespace Activities {
 
             this.main_window.activity_updated.connect((a) => {
                 // TODO : update the store here or in the view?
+                if (this.main_window.visible_project != null) {
+                    var current_store = this.main_window.visible_project.store;
+                    current_store.update_record(a);
+                }
             });
 
             // TODO : is there no better way to register shortcuts???

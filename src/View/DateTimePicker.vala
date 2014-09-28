@@ -28,6 +28,7 @@ namespace Activities.View {
         private Granite.Widgets.DatePicker date_picker;
         private Granite.Widgets.TimePicker time_picker;
 
+        private bool refreshing = false;
         private GLib.DateTime _date_time = new DateTime.now_local();
 
         public GLib.DateTime date_time {
@@ -66,6 +67,10 @@ namespace Activities.View {
         }
 
         private void on_changed() {
+            if (refreshing) {
+                return;
+            }
+
             debug("Something changed");
             if (!this.sensitive) {
                 warning("Picker is disabled ");
@@ -77,7 +82,6 @@ namespace Activities.View {
                 var date = date_picker.date;
                 var time = time_picker.time;
 
-                message("Updating with %s - %s", date.to_string(), time.to_string());
                 var new_date_time = new GLib.DateTime.local(
                     date.get_year(), date.get_month(), date.get_day_of_month(),
                     time.get_hour(), time.get_minute(), 0);
@@ -92,8 +96,13 @@ namespace Activities.View {
 
         private void refresh_view() {
             debug("Refreshing view");
-            this.date_picker.date = this._date_time;
-            this.time_picker.time = this._date_time;
+            this.refreshing = true;
+            try {
+                this.date_picker.date = this._date_time;
+                this.time_picker.time = this._date_time;
+            } finally {
+                this.refreshing = false;
+            }
         }
     }
 }

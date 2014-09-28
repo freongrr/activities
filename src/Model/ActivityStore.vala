@@ -53,6 +53,7 @@ namespace Activities.Model {
         }
 
         public void add_record(Activity activity) {
+            message("Adding an activity in the store");
             Gtk.TreeIter iter;
             this.append(out iter);
             this.set_value(iter, 0, activity);
@@ -67,9 +68,11 @@ namespace Activities.Model {
                 GLib.Value v;
                 this.get_value(iter, 0, out v);
                 if (activity.local_id == ((Activity) v).local_id) {
+                    message("Updating the activity in the store");
                     this.set_value(iter, 0, activity);
                     return true;
                 }
+                warning("Could not find the activity to update in the store");
                 return false;
             });
 
@@ -83,9 +86,11 @@ namespace Activities.Model {
                 GLib.Value v;
                 this.get_value(iter, 0, out v);
                 if (v == activity) {
+                    message("Remving the activity in the store");
                     this.remove(iter);
                     return true;
                 }
+                warning("Could not find the activity to remove in the store");
                 return false;
             });
 

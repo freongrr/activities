@@ -13,7 +13,7 @@ set (PKGDATADIR "${DATADIR}/activities")
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 add_definitions ("-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"")
 
-set (DEPENDENCIES gtk+-3.0 granite gee-1.0 libsoup-2.4 json-glib-1.0)
+set (DEPENDENCIES gtk+-3.0 granite gee-0.8 libsoup-2.4 json-glib-1.0)
 
 find_package (PkgConfig)
 pkg_check_modules (DEPS REQUIRED ${DEPENDENCIES})
@@ -25,7 +25,7 @@ link_directories (${DEPS_LIBRARY_DIRS})
 find_package (Vala REQUIRED)
 include (ValaVersion)
 include (ValaPrecompile)
-ensure_vala_version ("0.20" MINIMUM)
+ensure_vala_version ("0.22" MINIMUM)
 
 # TODO : enable that
 #SET(VALA_COMPILE_FLAGS "--enable-experimental-non-null")
@@ -56,7 +56,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Settings/SavedState.vala
     src/Utils/UrlBuilder.vala
     src/View/ActivityCellRenderer.vala
-    src/View/ActivityForm.vala
+    src/View/ActivityDetailView.vala
     src/View/ActivityList.vala
     src/View/AppMenu.vala
     src/View/AppToolbar.vala
