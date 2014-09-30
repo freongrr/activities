@@ -59,10 +59,15 @@ stdout.printf("  Restoring id=%s, name=%s, backend=%s\n", project_id, project_na
             var store = new ActivityStore();
 
             // Populate the store using the Serializer
-            var serializer = new DummySerializer(project_id); // TODO : proper serializer
-            var activities = serializer.load_activities();
-            foreach (var a in activities) {
-                store.add_record(a);
+            var serializer = new FileSerializer(project_id);
+
+            try {
+                var activities = serializer.load_activities();
+                foreach (var a in activities) {
+                    store.add_record(a);
+                }
+            } catch (SerializationErrors e) {
+                critical("Could not deserialize the activities: %s", e.message);
             }
 
             // Set the serializer after populating the store to avoid saving the activities for nothing

@@ -34,26 +34,28 @@ namespace Activities.Model {
             this.activities = new Gee.LinkedList<Activity>();
         }
 
-        internal void deserialize_search_results(Json.Node node) throws Errors {
+        internal void deserialize_search_results(Json.Node node) throws JIRAErrors {
             debug("Deserializing search results");
             if (node.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Unexpected element type %s", node.type_name());
+                throw new JIRAErrors.INVALID_FORMAT("Unexpected element type %s",
+                    node.type_name());
             }
 
             var wrapper = node.get_object();
             this.iterate_on_member(wrapper, "issues", (element_node) => {
                 try {
                     this.deserialize_issue(element_node);
-                } catch (Errors e) {
+                } catch (JIRAErrors e) {
                     warning("Could not deserialize results: %s", e.message);
                 }
             });
         }
 
-        private void deserialize_issue(Json.Node node) throws Errors {
+        private void deserialize_issue(Json.Node node) throws JIRAErrors {
             debug("Deserializing issue");
             if (node.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Unexpected element type %s", node.type_name());
+                throw new JIRAErrors.INVALID_FORMAT("Unexpected element type %s",
+                    node.type_name());
             }
 
             var issue = node.get_object();
@@ -74,26 +76,30 @@ namespace Activities.Model {
             this.tasks.add(task);
         }
 
-        private void deserialize_worklogs(Json.Node node, Model.Task? current_task) throws Errors {
+        private void deserialize_worklogs(Json.Node node, Model.Task? current_task)
+                throws JIRAErrors {
             debug("Deserializing worklog wrapper");
             if (node.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Unexpected element type %s", node.type_name());
+                throw new JIRAErrors.INVALID_FORMAT("Unexpected element type %s",
+                    node.type_name());
             }
 
             var wrapper = node.get_object();
             this.iterate_on_member(wrapper, "worklogs", (element_node) => {
                 try {
                     this.deserialize_worklog(element_node, current_task);
-                } catch (Errors e) {
+                } catch (JIRAErrors e) {
                     warning("Could not deserialize worklog %s", e.message);
                 }
             });
         }
 
-        private void deserialize_worklog(Json.Node node, Model.Task? current_task) throws Errors {
+        private void deserialize_worklog(Json.Node node, Model.Task? current_task)
+                throws JIRAErrors {
             debug("Deserializing worklog");
             if (node.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Unexpected element type %s", node.type_name());
+                throw new JIRAErrors.INVALID_FORMAT("Unexpected element type %s",
+                    node.type_name());
             }
 
             var worklog = node.get_object();
@@ -134,28 +140,32 @@ namespace Activities.Model {
             this.activities.add(activity);
         }
 
-        private Json.Object get_object_member(Json.Object object, string member_name) throws Errors {
+        private Json.Object get_object_member(Json.Object object, string member_name)
+                throws JIRAErrors {
             if (!object.has_member(member_name)) {
-                throw new Errors.INVALID_FORMAT("Object has no member '%s'", member_name);
+                throw new JIRAErrors.INVALID_FORMAT("Object has no member '%s'", member_name);
             }
 
             var member = object.get_member(member_name);
             if (member.get_node_type () != Json.NodeType.OBJECT) {
-                throw new Errors.INVALID_FORMAT("Member '%s' is not an object: %s", member_name, member.type_name());
+                throw new JIRAErrors.INVALID_FORMAT("Member '%s' is not an object: %s",
+                    member_name, member.type_name());
             }
 
             return member.get_object();
         }
 
-        private string get_string_member(Json.Object object, string member_name) throws Errors {
+        private string get_string_member(Json.Object object, string member_name)
+                throws JIRAErrors {
             if (!object.has_member(member_name)) {
-                throw new Errors.INVALID_FORMAT("Object has no member '%s'", member_name);
+                throw new JIRAErrors.INVALID_FORMAT("Object has no member '%s'", member_name);
             }
 
             return object.get_string_member(member_name);
         }
 
-        private string get_optional_string_member(Json.Object object, string member_name) throws Errors {
+        private string get_optional_string_member(Json.Object object, string member_name)
+                throws JIRAErrors {
             if (!object.has_member(member_name)) {
                 return "";
             } else {
@@ -163,14 +173,17 @@ namespace Activities.Model {
             }
         }
 
-        private void iterate_on_member(Json.Object object, string member_name, iterate_func function) throws Errors {
+        private void iterate_on_member(Json.Object object, string member_name, iterate_func function)
+                throws JIRAErrors {
             if (!object.has_member(member_name)) {
-                throw new Errors.INVALID_FORMAT("Object has no member called '%s'", member_name);
+                throw new JIRAErrors.INVALID_FORMAT("Object has no member called '%s'",
+                    member_name);
             }
 
             var member = object.get_member(member_name);
             if (member.get_node_type () != Json.NodeType.ARRAY) {
-                throw new Errors.INVALID_FORMAT("Member '%s' is not an array: %s", member_name, member.type_name());
+                throw new JIRAErrors.INVALID_FORMAT("Member '%s' is not an array: %s",
+                    member_name, member.type_name());
             }
 
             var array = member.get_array();

@@ -21,7 +21,7 @@
 
 namespace Activities.Model {
 
-    errordomain Errors {
+    errordomain JIRAErrors {
         FORBIDDEN, REQUEST, INVALID_FORMAT
     }
 
@@ -71,7 +71,7 @@ namespace Activities.Model {
         protected override Gee.Collection<Activity> fetch_activities(int days) {
             try {
                 return this.search("SP", days, 0, 99);
-            } catch (Errors e) {
+            } catch (JIRAErrors e) {
                 critical("Error fetching activies: %s", e.message);
                 return new Gee.ArrayList<Activity>();
             }
@@ -100,7 +100,8 @@ namespace Activities.Model {
                 .path("rest/api/latest");
         }
 
-        private Gee.Collection<Activity> search(string project, int days, int start_at, int max_results) throws Errors {
+        private Gee.Collection<Activity> search(string project, int days, int start_at, int max_results)
+                throws JIRAErrors {
             var predicate = "project = '%s' AND updated > '-%dd'".printf(project, days);
 
             var url = this.api_url();
@@ -120,7 +121,7 @@ namespace Activities.Model {
             return deserializer.activities;
         }
 
-        private string http_get(string url) throws Errors {
+        private string http_get(string url) throws JIRAErrors {
             try {
                 Soup.Message message = new Soup.Message("GET", url);
                 this.session.send_message(message);
@@ -128,25 +129,25 @@ namespace Activities.Model {
                 if (message.status_code == Soup.Status.BAD_REQUEST) {
                     // TODO : extract the errorMessages
                     var error_message = (string) message.response_body.data;
-                    throw new Errors.REQUEST("Invalid request: %s", error_message);
+                    throw new JIRAErrors.REQUEST("Invalid request: %s", error_message);
                 } else if (message.status_code != Soup.Status.OK) {
                     var status_message = Soup.Status.get_phrase(message.status_code);
-                    throw new Errors.REQUEST("Bad response: %s", status_message);
+                    throw new JIRAErrors.REQUEST("Bad response: %s", status_message);
                 }
 
                 return (string) message.response_body.data;
             } catch (Error e) {
-                throw new Errors.REQUEST("Request failed %s", e.message);
+                throw new JIRAErrors.REQUEST("Request failed %s", e.message);
             }
         }
 
-        private Json.Node parse_json(string json) throws Errors {
+        private Json.Node parse_json(string json) throws JIRAErrors {
             try {
                 Json.Parser parser = new Json.Parser();
                 parser.load_from_data(json);
                 return parser.get_root();
             } catch (Error e) {
-                throw new Errors.INVALID_FORMAT("Can't parse response: %s", e.message);
+                throw new JIRAErrors.INVALID_FORMAT("Can't parse response: %s", e.message);
             }
         }
 

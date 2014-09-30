@@ -25,7 +25,18 @@ namespace Activities.Model {
         UP_TO_DATE,
         CREATED_LOCALLY,
         UPDATED_LOCALLY,
-        DELETED_LOCALLY
+        DELETED_LOCALLY;
+
+        // TODO : there's no way this is the proper way to do it...
+        public static Status value_of(string name) {
+            EnumClass class_ref = (EnumClass) typeof (Status).class_ref();
+            unowned EnumValue? eval = class_ref.get_value_by_name (name);
+            if (eval == null) {
+			    return Status.CREATED_LOCALLY;
+		    } else {
+                return (Status) eval.value;
+            }
+        }
     }
 
     public class Activity : GLib.Object {

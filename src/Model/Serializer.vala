@@ -21,9 +21,13 @@
 
 namespace Activities.Model {
 
+    errordomain SerializationErrors {
+        FILE_ERROR, INVALID_FORMAT, INVALID_REFERENCE
+    }
+
     internal interface Serializer : Object {
 
-        internal abstract Gee.Collection<Activity> load_activities();
+        internal abstract Gee.Collection<Activity> load_activities() throws SerializationErrors;
 
         internal abstract void create_activity(Activity activity);
         internal abstract void update_activity(Activity activity);
