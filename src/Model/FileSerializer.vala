@@ -23,20 +23,30 @@ namespace Activities.Model {
 
     internal class FileSerializer : Object, Serializer {
 
-        internal Gee.Collection<Activity> activities { get; set; }
+        // TODO : it's silly to have the state in the serializer AND in the store
+        internal Gee.Map<string, Task> tasks;
+        internal Gee.Collection<Activity> activities;
         internal File file;
 
         internal FileSerializer(string project_id) {
+            this.tasks = new Gee.HashMap<string, Task>();
+            this.activities = new Gee.LinkedList<Activity>();
+
             var home = File.new_for_path(Environment.get_home_dir());
             this.file = home.get_child(project_id + "_activities.json");
         }
 
         internal Gee.Collection<Activity> load_activities() throws SerializationErrors {
+            this.tasks.clear();
+            this.activities.clear();
+
+            message("Loading activities from: %s", this.file.get_parse_name());
             if (!this.file.query_exists()) {
 		        throw new SerializationErrors.FILE_ERROR("File not found: %s",
                     this.file.get_parse_name());
             }
 
+            message("Parsing...");
             var parser = new Json.Parser();
             try {
                 parser.load_from_file(this.file.get_path());
@@ -46,13 +56,13 @@ namespace Activities.Model {
         	}
 
             var root = parser.get_root();
+            debug("Root = " + root.type_name());
             if (root.get_node_type () != Json.NodeType.OBJECT) {
                 throw new SerializationErrors.INVALID_FORMAT("Root should be an object");
             }
 
-            var tasks = new Gee.HashMap<string, Task>();
-
             var task_nodes = root.get_object().get_member("tasks");
+            debug("Tasks = " + (task_nodes == null ? "null" : task_nodes.type_name()));
             if (task_nodes != null) {
                 if (task_nodes.get_node_type() != Json.NodeType.ARRAY) {
                     throw new SerializationErrors.INVALID_FORMAT(
@@ -62,14 +72,13 @@ namespace Activities.Model {
                 task_nodes.get_array().foreach_element((array, index, element_node) => {
                     var task = this.deserialize_task(element_node);
                     if (task != null) {
-                        tasks.@set(task.local_id, task);
+                        this.tasks.@set(task.local_id, task);
                     }
                 });
             }
 
-            var activities = new Gee.LinkedList<Activity>();
-
-            var activity_nodes = root.get_object().get_member("activity");
+            var activity_nodes = root.get_object().get_member("activities");
+            debug("Activities = " + (activity_nodes == null ? "null" : activity_nodes.type_name()));
             if (activity_nodes != null) {
                 if (activity_nodes.get_node_type() != Json.NodeType.ARRAY) {
                     throw new SerializationErrors.INVALID_FORMAT(
@@ -77,14 +86,14 @@ namespace Activities.Model {
                 }
 
                 activity_nodes.get_array().foreach_element((array, index, element_node) => {
-                    var activity = this.deserialize_activity(tasks, element_node);
+                    var activity = this.deserialize_activity(element_node);
                     if (activity != null) {
-                        activities.add(activity);
+                        this.activities.add(activity);
                     }
                 });
             }
 
-            return activities;
+            return this.activities;
         }
 
         private Task? deserialize_task(Json.Node node) {
@@ -120,7 +129,7 @@ namespace Activities.Model {
             return task;
         }
 
-        private Activity? deserialize_activity(Gee.HashMap<string, Task> tasks, Json.Node node) {
+        private Activity? deserialize_activity(Json.Node node) {
             debug("Deserializing activity");
             if (node.get_node_type () != Json.NodeType.OBJECT) {
                 critical("Unexpected element type %s", node.type_name());
@@ -148,7 +157,9 @@ namespace Activities.Model {
             var activity = new Activity(local_id);
             activity.remote_id = remote_id;
             activity.description = description;
-            activity.task = tasks.@get(task_id);
+            if (task_id != null) {
+                activity.task = this.tasks.@get(task_id);
+            }
             activity.start_date = this.parse_date_time(start_date);
             activity.end_date = this.parse_date_time(end_date);
             activity.status = Status.value_of(status);
@@ -175,15 +186,121 @@ namespace Activities.Model {
         }
 
         internal void create_activity(Activity activity) {
-            message("NOOP - Storing a new activity: %s", activity.to_string());
+            message("Storing a new activity: %s", activity.to_string());
+            this.activities.add(activity);
+            if (activity.task != null) {
+                this.tasks.@set(activity.task.local_id, activity.task);
+            }
+            this.save_all();
         }
 
         internal void update_activity(Activity activity) {
-            message("NOOP - Storing an updated activity: %s", activity.to_string());
+            message("Storing an updated activity: %s", activity.to_string());
+            this.activities.remove(activity);
+            this.activities.add(activity);
+            if (activity.task != null) {
+                this.tasks.@set(activity.task.local_id, activity.task);
+            }
+            this.save_all();
         }
 
         internal void delete_activity(Activity activity) {
-            message("NOOP - Deleting an activity: %s", activity.to_string());
+            message("Deleting an activity: %s", activity.to_string());
+            this.activities.remove(activity);
+            // TODO : when do we remove activities?
+            this.save_all();
+        }
+
+        // TODO : it's inefficient to save all every time!
+        private void save_all() {
+            var builder = new Json.Builder();
+
+            builder.begin_object();
+            builder.set_member_name("tasks");
+            builder.begin_array();
+            foreach (var task in this.tasks.values) {
+                serialize_task(builder, task);
+            }
+            builder.end_array();
+
+            builder.set_member_name("activities");
+            builder.begin_array();
+            foreach (var activity in this.activities) {
+                serialize_activity(builder, activity);
+            }
+            builder.end_array();
+            builder.end_object();
+
+            var generator = new Json.Generator();
+            generator.root = builder.get_root();
+            generator.pretty = true;
+            generator.indent = 4;
+            generator.indent_char = ' ';
+
+            try {
+                generator.to_file(this.file.get_parse_name());
+            } catch (Error e) {
+                // TODO : bubble up?
+                critical("Error generating to file: %s", e.message);
+            }
+        }
+
+        private void serialize_task(Json.Builder builder, Task task) {
+            // TODO
+            builder.begin_object();
+            builder.set_member_name("local_id");
+            builder.add_string_value(task.local_id);
+            builder.set_member_name("key");
+            builder.add_string_value(task.key);
+            builder.end_object();
+        }
+
+        private void serialize_activity(Json.Builder builder, Activity activity) {
+            builder.begin_object();
+
+            builder.set_member_name("local_id");
+            builder.add_string_value(activity.local_id);
+
+            if (activity.remote_id != null) {
+                builder.set_member_name("remote_id");
+                builder.add_string_value(activity.remote_id);
+            }
+
+            builder.set_member_name("description");
+            builder.add_string_value(activity.description);
+
+            if (activity.task != null) {
+                builder.set_member_name("task_id");
+                builder.add_string_value(activity.description);
+            }
+
+            if (activity.start_date != null) {
+                builder.set_member_name("start_date");
+                builder.add_string_value(serialize_date_time(activity.start_date));
+            }
+
+            if (activity.end_date != null) {
+                builder.set_member_name("end_date");
+                builder.add_string_value(serialize_date_time(activity.end_date));
+            }
+
+            builder.set_member_name("status");
+            builder.add_string_value(activity.status.to_string());
+
+            builder.set_member_name("tags");
+            builder.begin_array();
+            foreach (string tag in activity.tags) {
+                builder.add_string_value(tag);
+            }
+            builder.end_array();
+
+            builder.end_object();
+        }
+
+        private string serialize_date_time(DateTime dt) {
+            var time_val = GLib.TimeVal();
+            dt.to_timeval(out time_val);
+            return time_val.to_iso8601() + " " + dt.get_timezone_abbreviation();
         }
     }
 }
