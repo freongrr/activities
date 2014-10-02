@@ -53,9 +53,21 @@ namespace Activities.View {
         private Model.Activity? _activity;
 
         internal ActivityDetailView() {
-            this.task_entry = new Gtk.Entry();
+            var completion = new Gtk.EntryCompletion();
+            completion.set_model(new TaskStore());
+            completion.set_text_column(1);
+            completion.set_match_func(match_task);
+            completion.match_selected.connect((model, iter) => {
+                GLib.Value v;
+                model.get_value(iter, 0, out v);
+                this.set_task((Model.Task) v);
+                return false;
+            });
+
+            this.task_entry = new Gtk.SearchEntry();
+            this.task_entry.set_completion(completion);
             this.task_entry.changed.connect(() => {
-                // TODO : can the task be changed?
+                this.set_task_from_description(task_entry.text);
             });
 
             this.description_entry = new Gtk.Entry();
@@ -182,6 +194,79 @@ namespace Activities.View {
                 builder.append(tag);
             }
             return builder.str;
+        }
+
+        private bool match_task(Gtk.EntryCompletion completion, string key, Gtk.TreeIter iter) {
+            var down_key = key.down();
+
+            GLib.Value store_value;
+            completion.model.get_value(iter, 0, out store_value);
+
+            var task = (Model.Task) store_value;
+            return task.key.down().contains(down_key) ||
+                    task.description.down().contains(down_key);
+        }
+
+        private void set_task(Model.Task new_task) {
+            var task = this._activity.task;
+            if (task == null || task.local_id != new_task.local_id) {
+                debug("Task selected: " + new_task.to_string());
+                this._activity.task = new_task;
+                this.changed();
+            }
+        }
+
+        private void set_task_from_description(string description) {
+            var task = this._activity.task;
+            if (task == null) {
+                // TODO : the view should not be doing that...
+                var local_id = "task";
+                local_id += "_" + new GLib.DateTime.now_utc().to_unix().to_string();
+                local_id += "_" + GLib.Random.int_range(0, 999).to_string();
+                task = new Model.Task(local_id);
+            }
+
+            if (task.description != description) {
+                // TODO : should we get rid of the key?
+                task.key = "???";
+                task.description = description;
+
+                debug("Task edited: " + task.to_string());
+                this._activity.task = task;
+                this.changed();
+            }
+        }
+    }
+
+    private class TaskStore : Gtk.ListStore {
+
+        internal TaskStore() {
+            this.set_column_types({typeof (Model.Task), typeof (string)});
+
+            var task = new Model.Task("t1");
+            task.key = "T-1";
+            task.description = "Task 1";
+
+            this.add(task);
+
+            task = new Model.Task("t2");
+            task.key = "T-2";
+            task.description = "Second task";
+
+            this.add(task);
+
+            task = new Model.Task("t3");
+            task.key = "T-3";
+            task.description = "Third task";
+
+            this.add(task);
+        }
+
+        private void add(Model.Task task) {
+            Gtk.TreeIter iter;
+            this.append(out iter);
+            this.@set(iter, 0, task);
+            this.@set(iter, 1, task.key + " - " + task.description);
         }
     }
 }

@@ -24,6 +24,7 @@ namespace Activities.Model {
     // TODO : interface
     public class ActivityStore : Gtk.ListStore {
 
+        // TODO : the serializer should not be there - it should listen for the store events
         internal Serializer? serializer;
         internal DateTime? last_synchronization;
 
