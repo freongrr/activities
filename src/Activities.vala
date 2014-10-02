@@ -186,7 +186,7 @@ namespace Activities {
             toolbar.new_button.clicked.connect(() => this.on_new_activity());
             toolbar.resume_button.clicked.connect(() => stdout.printf("Resume button clicked\n"));
             toolbar.stop_button.clicked.connect(() => stdout.printf("Stop button clicked\n"));
-            toolbar.delete_button.clicked.connect(() => stdout.printf("Delete button clicked\n"));
+            toolbar.delete_button.clicked.connect(() => this.on_delete_activity());
             toolbar.menu.about.activate.connect(() => show_about(main_window));
 
             this.main_window.set_titlebar(toolbar);
@@ -199,18 +199,32 @@ namespace Activities {
         }
 
         private void on_synchronize_activities() {
+            message("Synchronizing...");
             foreach (var project in this.project_manager.projects) {
-                debug("Synchronizing %s...", project.name);
+                debug("Synchronizing project %s...", project.name);
                 project.backend.synchronize(project.store);
             }
+            message("Done");
         }
 
         private void on_new_activity() {
-            stdout.printf("New Activity\n");
+            message("New Activity");
             var local_id = "activity";
             local_id += "_" + new GLib.DateTime.now_utc().to_unix().to_string();
             local_id += "_" + GLib.Random.int_range(0, 999).to_string();
-            this.main_window.visible_activity = new Model.Activity(local_id);
+
+            var activity = new Model.Activity(local_id);
+            var project = this.main_window.visible_project;
+            project.store.add_record(activity);
+            this.main_window.visible_activity = activity;
+        }
+
+        private void on_delete_activity() {
+            var project = this.main_window.visible_project;
+            var activity = this.main_window.visible_activity;
+            if (project != null && activity != null) {
+                project.store.delete_record(activity);
+            }
         }
     }
 

@@ -59,42 +59,56 @@ namespace Activities.Model {
             this.set_value(iter, 0, activity);
 
             if (this.serializer != null) {
-                this.serializer.create_activity(activity);
+                if (this.can_save(activity)) {
+                    this.serializer.create_activity(activity);
+                }
             }
         }
 
         public void update_record(Activity activity) {
+            bool found = false;
             this.@foreach((model, path, iter) => {
                 GLib.Value v;
                 this.get_value(iter, 0, out v);
                 if (activity.local_id == ((Activity) v).local_id) {
+                    found = true;
                     message("Updating the activity in the store");
                     this.set_value(iter, 0, activity);
                     return true;
                 }
-                warning("Could not find the activity to update in the store");
                 return false;
             });
 
-            if (this.serializer != null) {
-                this.serializer.update_activity(activity);
+            if (!found) {
+                warning("Could not find the activity to update in the store");
+            } else if (this.serializer != null) {
+                if (this.can_save(activity)) {
+                    this.serializer.update_activity(activity);
+                }
             }
         }
 
+        private bool can_save(Activity activity) {
+            return activity.task != null;
+        }
+
         public void delete_record(Activity activity) {
+            bool found = false;
             this.@foreach((model, path, iter) => {
                 GLib.Value v;
                 this.get_value(iter, 0, out v);
-                if (v == activity) {
-                    message("Remving the activity in the store");
+                if (activity.local_id == ((Activity) v).local_id) {
+                    found = true;
+                    message("Removing the activity in the store");
                     this.remove(iter);
                     return true;
                 }
-                warning("Could not find the activity to remove in the store");
                 return false;
             });
 
-            if (this.serializer != null) {
+            if (!found) {
+                warning("Could not find the activity to remove in the store");
+            } else if (this.serializer != null) {
                 this.serializer.delete_activity(activity);
             }
         }

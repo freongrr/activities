@@ -22,7 +22,7 @@
 namespace Activities.Model {
 
     errordomain SerializationErrors {
-        FILE_ERROR, INVALID_FORMAT, INVALID_REFERENCE
+        FILE_NOT_FOUND, INVALID_FORMAT, INVALID_REFERENCE
     }
 
     internal interface Serializer : Object {

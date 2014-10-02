@@ -42,8 +42,8 @@ namespace Activities.Model {
 
             message("Loading activities from: %s", this.file.get_parse_name());
             if (!this.file.query_exists()) {
-		        throw new SerializationErrors.FILE_ERROR("File not found: %s",
-                    this.file.get_parse_name());
+		        throw new SerializationErrors.FILE_NOT_FOUND(
+                    "File not found: %s", this.file.get_parse_name());
             }
 
             message("Parsing...");
@@ -51,8 +51,8 @@ namespace Activities.Model {
             try {
                 parser.load_from_file(this.file.get_path());
 	        } catch (Error e) {
-		        throw new SerializationErrors.FILE_ERROR("Unable to parse '%s': %s",
-                    this.file.get_path(), e.message);
+		        throw new SerializationErrors.INVALID_FORMAT(
+                    "Unable to parse '%s': %s", this.file.get_path(), e.message);
         	}
 
             var root = parser.get_root();
@@ -196,19 +196,25 @@ namespace Activities.Model {
 
         internal void update_activity(Activity activity) {
             message("Storing an updated activity: %s", activity.to_string());
-            this.activities.remove(activity);
-            this.activities.add(activity);
-            if (activity.task != null) {
-                this.tasks.@set(activity.task.local_id, activity.task);
+            if (this.activities.remove(activity)) {
+                this.activities.add(activity);
+                if (activity.task != null) {
+                    this.tasks.@set(activity.task.local_id, activity.task);
+                }
+                this.save_all();
+            } else {
+                warning("Could not find the activity!");
             }
-            this.save_all();
         }
 
         internal void delete_activity(Activity activity) {
             message("Deleting an activity: %s", activity.to_string());
-            this.activities.remove(activity);
-            // TODO : when do we remove activities?
-            this.save_all();
+            if (this.activities.remove(activity)) {
+                // TODO : when do we remove activities?
+                this.save_all();
+            } else {
+                warning("Could not find the activity!");
+            }
         }
 
         // TODO : it's inefficient to save all every time!

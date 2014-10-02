@@ -113,7 +113,7 @@ namespace Activities.View {
             this.pack_start(this.description_entry, false, false, 0);
             this.pack_start(this.create_label("Tags"), false, false, 0);
             this.pack_start(this.tags_entry, false, false, 0);
-            this.pack_start(this.create_label("Notes"), false, false, 0);
+            this.pack_start(this.create_label("Task Notes"), false, false, 0);
             this.pack_start(this.create_frame(this.notes_text_view), true, true, 0);
         }
 
@@ -162,14 +162,15 @@ namespace Activities.View {
                 this.tags_entry.sensitive = true;
                 this.start_picker.sensitive = true;
                 this.end_picker.sensitive = true;
-                this.notes_text_view.sensitive = true;
 
-                this.task_entry.text = this._activity.task.key + " - " + this._activity.task.description;
+                this.task_entry.text = this._activity.task == null
+                    ? "" : (this._activity.task.key + " - " + this._activity.task.description);
                 this.description_entry.text = this._activity.description;
                 this.tags_entry.text = this.get_tags_as_string();
                 this.start_picker.date_time = this._activity.start_date;
                 this.end_picker.date_time = this._activity.end_date;
-                this.notes_text_view.buffer.text = this._activity.task.notes;
+                this.notes_text_view.buffer.text = this._activity.task == null
+                    ? "" : this._activity.task.notes;
             }
         }
 

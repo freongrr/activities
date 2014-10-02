@@ -28,9 +28,8 @@ include (ValaPrecompile)
 ensure_vala_version ("0.22" MINIMUM)
 
 # TODO : enable that
-#SET(VALA_COMPILE_FLAGS "--enable-experimental-non-null")
-#SET(VALA_COMPILE_FLAGS --enable-checking --fatal-warnings)
-#SET(VALA_COMPILE_FLAGS_DEBUG -X -ggdb3)
+# set (VALA_COMPILE_FLAGS --enable-experimental-non-null --enable-checking --fatal-warnings)
+set (VALA_COMPILE_FLAGS_DEBUG -X -ggdb3)
 
 configure_file (${CMAKE_SOURCE_DIR}/src/config.vala.cmake ${CMAKE_SOURCE_DIR}/src/config.vala)
 

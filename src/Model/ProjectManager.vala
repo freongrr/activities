@@ -38,13 +38,14 @@ namespace Activities.Model {
         // TODO : use Granite.Services.SettingsSerializable instead
         public void load_projects() {
             int projects = this.project_definitions.count;
-stdout.printf("Restoring %d projects\n", projects);
+            message("Restoring %d projects", projects);
             for (int i = 0; i < projects; i++) {
                 var project_id = this.project_definitions.ids[i];
                 var project_name = this.project_definitions.names[i];
                 var backend_name = this.project_definitions.backends[i];
 
-stdout.printf("  Restoring id=%s, name=%s, backend=%s\n", project_id, project_name, backend_name);
+                debug("Restoring id=%s, name=%s, backend=%s",
+                    project_id, project_name, backend_name);
 
                 var backend = new DummyBackend(); // TODO : properly instantiate the class
                 var project = create_project(project_id, project_name, backend);
@@ -67,7 +68,11 @@ stdout.printf("  Restoring id=%s, name=%s, backend=%s\n", project_id, project_na
                     store.add_record(a);
                 }
             } catch (SerializationErrors e) {
-                critical("Could not deserialize the activities: %s", e.message);
+                if (e is SerializationErrors.FILE_NOT_FOUND) {
+                    message("Nothing to deserialize: %s", e.message);
+                } else {
+                    critical("Could not deserialize the activities: %s", e.message);
+                }
             }
 
             // Set the serializer after populating the store to avoid saving the activities for nothing
