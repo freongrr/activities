@@ -55,6 +55,7 @@ namespace Activities.Model {
             this.status = Status.UP_TO_DATE;
             this.local_id = local_id;
             this.description = "";
+            this.start_date = new DateTime.now_local();
             this.tags = new Gee.HashSet<string>();
         }
 

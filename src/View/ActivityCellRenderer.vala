@@ -88,11 +88,14 @@ namespace Activities.View {
         private void render_time(Model.Activity activity) {
             string text = "NULL";
             if (activity != null && activity.start_date != null) {
-                text = this.time_to_string(activity.start_date);
-                if (activity.end_date == null) {
-                    text += " (" + this.duration_to_string(activity.end_date, new DateTime.now_local()) + ")";
+                var start = activity.start_date;
+                var end = activity.end_date;
+                text = this.time_to_string(start);
+                if (end == null) {
+                    var now = new DateTime.now_local();
+                    text += " (" + this.duration_to_string(now, start) + ")";
                 } else {
-                    text += " (" + this.duration_to_string(activity.end_date, activity.start_date) + ")";
+                    text += " (" + this.duration_to_string(end, start) + ")";
                 }
             }
 
@@ -145,7 +148,7 @@ namespace Activities.View {
                 date_time.get_day_of_month(), date_time.get_hour(), date_time.get_minute());
         }
 
-        private string duration_to_string(GLib.DateTime end_time, GLib.DateTime start_time) {
+        private string duration_to_string(GLib.DateTime? end_time, GLib.DateTime? start_time) {
             TimeSpan diff = end_time.difference(start_time);
             // TODO : not pretty
             var builder = new StringBuilder();
@@ -164,6 +167,9 @@ namespace Activities.View {
                 }
                 builder.append("%dm".printf(minutes));
                 diff = diff - minutes * TimeSpan.MINUTE;
+            }
+            if (builder.len == 0) {
+                builder.append("???");
             }
             return builder.str;
         }

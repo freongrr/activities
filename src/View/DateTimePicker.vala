@@ -29,15 +29,18 @@ namespace Activities.View {
         private Granite.Widgets.TimePicker time_picker;
 
         private bool refreshing = false;
-        private GLib.DateTime _date_time = new DateTime.now_local();
+        private GLib.DateTime? _date_time;
 
         public GLib.DateTime date_time {
             get {
                 return this._date_time;
             }
             set {
-                warn_if_fail(value != null);
-                debug("New value: %s", value.to_string());
+                if (value == null) {
+                    debug("New value: null");
+                } else {
+                    debug("New value: %s", value.to_string());
+                }
                 this._date_time = value;
                 refresh_view();
             }
@@ -55,8 +58,6 @@ namespace Activities.View {
             this.time_picker.time_changed.connect(this.on_changed);
 
             this.layout();
-
-            this.date_time = new DateTime.now_local();
         }
 
         private void layout() {
@@ -95,11 +96,17 @@ namespace Activities.View {
         }
 
         private void refresh_view() {
-            debug("Refreshing view");
             this.refreshing = true;
             try {
-                this.date_picker.date = this._date_time;
-                this.time_picker.time = this._date_time;
+                if (this.date_time == null) {
+                    this.date_picker.date = new DateTime.now_local();
+                    this.time_picker.time = new DateTime.now_local();
+                    this.date_picker.set_text("");
+                    this.time_picker.set_text("");
+                } else {
+                    this.date_picker.date = this.date_time;
+                    this.time_picker.time = this.date_time;
+                }
             } finally {
                 this.refreshing = false;
             }

@@ -151,8 +151,8 @@ namespace Activities.View {
                 this.task_entry.text = "";
                 this.description_entry.text = "";
                 this.tags_entry.text = "";
-                this.start_picker.date_time = new DateTime.now_local();
-                this.end_picker.date_time = new DateTime.now_local();
+                this.start_picker.date_time = null;
+                this.end_picker.date_time = null;
                 this.notes_text_view.buffer.text = "";
             } else {
                 debug("Update view -> %s", this._activity.to_string());
