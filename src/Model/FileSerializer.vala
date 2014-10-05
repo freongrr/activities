@@ -19,6 +19,7 @@
   END LICENSE
 ***/
 
+using Gee;
 using Activities.Utils;
 
 namespace Activities.Model {
@@ -26,27 +27,27 @@ namespace Activities.Model {
     internal class FileSerializer : Object, Serializer {
 
         // TODO : it's silly to have the state in the serializer AND in the store
-        private Gee.Map<string, Task> tasks;
-        private Gee.Map<string, Activity> activities;
+        private Map<string, Task> tasks;
+        private Map<string, Activity> activities;
         private File file;
         private bool loaded = false;
 
         internal FileSerializer(string project_id) {
-            this.tasks = new Gee.HashMap<string, Task>();
-            this.activities = new Gee.HashMap<string, Activity>();
+            this.tasks = new HashMap<string, Task>();
+            this.activities = new HashMap<string, Activity>();
 
             var home = File.new_for_path(Environment.get_home_dir());
             this.file = home.get_child(project_id + "_activities.json");
         }
 
-        internal Gee.Collection<Task> load_tasks() throws SerializationErrors {
+        internal Collection<Task> load_tasks() throws SerializationErrors {
             if (!loaded) {
                 load_everything();
             }
             return tasks.values;
         }
 
-        internal Gee.Collection<Activity> load_activities() throws SerializationErrors {
+        internal Collection<Activity> load_activities() throws SerializationErrors {
             if (!loaded) {
                 load_everything();
             }
@@ -87,7 +88,7 @@ namespace Activities.Model {
                 task_nodes.get_array().foreach_element((array, index, element_node) => {
                     var task = this.deserialize_task(element_node);
                     if (task != null) {
-                        this.tasks.@set(task.local_id, task);
+                        this.tasks[task.local_id] = task;
                     }
                 });
             }
@@ -102,7 +103,7 @@ namespace Activities.Model {
                 activity_nodes.get_array().foreach_element((array, index, element_node) => {
                     var activity = this.deserialize_activity(element_node);
                     if (activity != null) {
-                        this.activities.@set(activity.local_id, activity);
+                        this.activities[activity.local_id] = activity;
                     }
                 });
             }
@@ -147,12 +148,12 @@ namespace Activities.Model {
             activity.remote_id = JSON.get_string(object, "remote_id");
             activity.description = JSON.get_string(object, "description");
             if (task_id != null) {
-                activity.task = this.tasks.@get(task_id);
+                activity.task = this.tasks[task_id];
             }
             activity.start_date = JSON.get_date_time(object, "start_date");
             activity.end_date = JSON.get_date_time(object, "end_date");
             activity.status = Status.value_of(status);
-            activity.tags = new Gee.HashSet<string>();
+            activity.tags = new HashSet<string>();
             if (tags != null) {
                 tags.foreach_element((array, index, element_node) => {
                     var tag = element_node.get_string();
@@ -166,9 +167,9 @@ namespace Activities.Model {
         }
 
         internal void create_activity(Activity activity) {
-            this.activities.@set(activity.local_id, activity);
+            this.activities[activity.local_id] = activity;
             if (activity.task != null) {
-                this.tasks.@set(activity.task.local_id, activity.task);
+                this.tasks[activity.task.local_id] = activity.task;
             }
             this.save_all();
         }
@@ -176,9 +177,9 @@ namespace Activities.Model {
         internal void update_activity(Activity activity) {
             message("Storing an updated activity: %s", activity.to_string());
 
-            this.activities.@set(activity.local_id, activity);
+            this.activities[activity.local_id] = activity;
             if (activity.task != null) {
-                this.tasks.@set(activity.task.local_id, activity.task);
+                this.tasks[activity.task.local_id] = activity.task;
             }
 
             this.save_all();
