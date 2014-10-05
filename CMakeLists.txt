@@ -55,6 +55,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Model/TaskStore.vala
     src/Settings/ProjectDefinitions.vala
     src/Settings/SavedState.vala
+    src/Utils/JSON.vala
     src/Utils/UrlBuilder.vala
     src/View/ActivityCellRenderer.vala
     src/View/ActivityDetailView.vala

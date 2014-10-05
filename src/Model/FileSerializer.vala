@@ -19,6 +19,8 @@
   END LICENSE
 ***/
 
+using Activities.Utils;
+
 namespace Activities.Model {
 
     internal class FileSerializer : Object, Serializer {
@@ -117,27 +119,14 @@ namespace Activities.Model {
 
             var object = node.get_object();
 
-            var local_id = object.get_string_member("local_id");
-            var remote_id = object.get_string_member("remote_id");
-            var key = object.get_string_member("key");
-            var description = object.get_string_member("description");
-            var notes = object.get_string_member("notes");
-            var closed = object.get_boolean_member("closed");
+            var task = new Task(JSON.get_string(object, "local_id"));
+            task.remote_id = JSON.get_string(object, "remote_id");
+            task.key = JSON.get_string(object, "key");
+            task.description = JSON.get_string(object, "description") ?? "";
+            task.notes = JSON.get_string(object, "notes");
+            task.closed = JSON.get_boolean(object, "closed");
 
-            debug("  local_id: " + local_id);
-            debug("  remote_id: " + remote_id);
-            debug("  key: " + key);
-            debug("  description: " + description);
-            debug("  notes: " + notes);
-            debug("  closed: " + closed.to_string());
-
-            var task = new Task(local_id);
-            task.remote_id = remote_id;
-            task.key = key;
-            task.description = description;
-            task.notes = notes;
-            task.closed = closed;
-
+            debug(" -> " + task.to_string());
             return task;
         }
 
@@ -150,30 +139,18 @@ namespace Activities.Model {
 
             var object = node.get_object();
 
-            var status = object.get_string_member("status");
-            var local_id = object.get_string_member("local_id");
-            var remote_id = object.get_string_member("remote_id");
-            var description = object.get_string_member("description");
-            var task_id = object.get_string_member("task_id");
-            var start_date = object.get_string_member("start_date");
-            var end_date = object.get_string_member("end_date");
-        	var tags = object.get_array_member("tags");
+            var status = JSON.get_string(object, "status");
+            var task_id = JSON.get_string(object, "task_id");
+        	var tags = JSON.get_array(object, "tags");
 
-            debug("  status: " + status);
-            debug("  local_id: " + local_id);
-            debug("  remote_id: " + remote_id);
-            debug("  description: " + description);
-            debug("  start_date: " + start_date);
-            debug("  end_date: " + end_date);
-
-            var activity = new Activity(local_id);
-            activity.remote_id = remote_id;
-            activity.description = description;
+            var activity = new Activity(JSON.get_string(object, "local_id"));
+            activity.remote_id = JSON.get_string(object, "remote_id");
+            activity.description = JSON.get_string(object, "description");
             if (task_id != null) {
                 activity.task = this.tasks.@get(task_id);
             }
-            activity.start_date = this.parse_date_time(start_date);
-            activity.end_date = this.parse_date_time(end_date);
+            activity.start_date = JSON.get_date_time(object, "start_date");
+            activity.end_date = JSON.get_date_time(object, "end_date");
             activity.status = Status.value_of(status);
             activity.tags = new Gee.HashSet<string>();
             if (tags != null) {
@@ -184,17 +161,8 @@ namespace Activities.Model {
                 });
             }
 
+            debug(" -> " + activity.to_string());
             return activity;
-        }
-
-        private DateTime? parse_date_time(string? date_time_string) {
-            if (date_time_string == null) {
-                return null;
-            }
-            // TODO : we lose the TimeZone!
-            var time_val = GLib.TimeVal();
-            time_val.from_iso8601(date_time_string);
-            return new DateTime.from_timeval_local(time_val);
         }
 
         internal void create_activity(Activity activity) {
@@ -289,16 +257,8 @@ namespace Activities.Model {
                 builder.add_string_value(activity.task.local_id);
             }
 
-            if (activity.start_date != null) {
-                builder.set_member_name("start_date");
-                builder.add_string_value(serialize_date_time(activity.start_date));
-            }
-
-            if (activity.end_date != null) {
-                builder.set_member_name("end_date");
-                builder.add_string_value(serialize_date_time(activity.end_date));
-            }
-
+            JSON.set_date_time(builder, "start_date", activity.start_date);
+            JSON.set_date_time(builder, "end_date", activity.end_date);
             builder.set_member_name("status");
             builder.add_string_value(activity.status.to_string());
 
@@ -310,12 +270,6 @@ namespace Activities.Model {
             builder.end_array();
 
             builder.end_object();
-        }
-
-        private string serialize_date_time(DateTime dt) {
-            var time_val = GLib.TimeVal();
-            dt.to_timeval(out time_val);
-            return time_val.to_iso8601() + " " + dt.get_timezone_abbreviation();
         }
     }
 }
