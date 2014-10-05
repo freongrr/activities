@@ -230,28 +230,24 @@ namespace Activities.Model {
         }
 
         private void serialize_task(Json.Builder builder, Task task) {
-            // TODO
             builder.begin_object();
-            builder.set_member_name("local_id");
-            builder.add_string_value(task.local_id);
-            builder.set_member_name("key");
-            builder.add_string_value(task.key);
+
+            JSON.set_string(builder, "local_id", task.local_id);
+            JSON.set_string(builder, "remote_id", task.remote_id);
+            JSON.set_string(builder, "key", task.key);
+            JSON.set_string(builder, "description", task.description);
+            JSON.set_string(builder, "notes", task.notes);
+            JSON.set_boolean(builder, "closed", task.closed);
+
             builder.end_object();
         }
 
         private void serialize_activity(Json.Builder builder, Activity activity) {
             builder.begin_object();
 
-            builder.set_member_name("local_id");
-            builder.add_string_value(activity.local_id);
-
-            if (activity.remote_id != null) {
-                builder.set_member_name("remote_id");
-                builder.add_string_value(activity.remote_id);
-            }
-
-            builder.set_member_name("description");
-            builder.add_string_value(activity.description);
+            JSON.set_string(builder, "local_id", activity.local_id);
+            JSON.set_string(builder, "remote_id", activity.remote_id);
+            JSON.set_string(builder, "description", activity.description);
 
             if (activity.task != null) {
                 builder.set_member_name("task_id");
@@ -260,8 +256,8 @@ namespace Activities.Model {
 
             JSON.set_date_time(builder, "start_date", activity.start_date);
             JSON.set_date_time(builder, "end_date", activity.end_date);
-            builder.set_member_name("status");
-            builder.add_string_value(activity.status.to_string());
+
+            JSON.set_string(builder, "status", activity.status.to_string());
 
             builder.set_member_name("tags");
             builder.begin_array();

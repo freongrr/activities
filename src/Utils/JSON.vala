@@ -61,11 +61,23 @@ namespace Activities.Utils {
             }
         }
 
+        public static void set_string(Json.Builder builder, string name, string? s) {
+            if (s == null) {
+                return;
+            }
+            builder.set_member_name(name);
+            builder.add_string_value(s);
+        }
+
+        public static void set_boolean(Json.Builder builder, string name, bool b) {
+            builder.set_member_name(name);
+            builder.add_boolean_value(b);
+        }
+
         public static void set_date_time(Json.Builder builder, string name, DateTime? date_time) {
             if (date_time == null) {
                 return;
             }
-
             builder.set_member_name(name);
             builder.add_string_value(serialize_date_time(date_time));
         }
