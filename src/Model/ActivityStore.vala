@@ -23,6 +23,10 @@ namespace Activities.Model {
 
     public class ActivityStore : Gtk.ListStore {
 
+        public signal void created(Activity activity);
+        public signal void updated(Activity activity);
+        public signal void deleted(Activity activity);
+
         internal DateTime? last_synchronization;
 
         public ActivityStore() {
@@ -55,6 +59,8 @@ namespace Activities.Model {
             Gtk.TreeIter iter;
             this.append(out iter);
             this.set_value(iter, 0, activity);
+
+            this.created(activity);
         }
 
         public void update_record(Activity activity) {
@@ -71,7 +77,9 @@ namespace Activities.Model {
                 return false;
             });
 
-            if (!found) {
+            if (found) {
+                this.updated(activity);
+            } else {
                 warning("Could not find the activity to update in the store");
             }
         }
@@ -90,7 +98,9 @@ namespace Activities.Model {
                 return false;
             });
 
-            if (!found) {
+            if (found) {
+                this.deleted(activity);
+            } else {
                 warning("Could not find the activity to remove in the store");
             }
         }

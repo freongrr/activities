@@ -23,6 +23,10 @@ namespace Activities.Model {
 
     public class TaskStore : Gtk.ListStore {
 
+        public signal void created(Task task);
+        public signal void updated(Task task);
+        public signal void deleted(Task task);
+
         public TaskStore() {
             this.set_column_types({typeof (Model.Task), typeof (string)});
 
@@ -59,15 +63,9 @@ namespace Activities.Model {
             Gtk.TreeIter iter;
             this.append(out iter);
             this.@set(iter, 0, task);
-            this.@set(iter, 1, label(task));
-        }
+            this.@set(iter, 1, task.description);
 
-        private string label(Task task) {
-            if (task.key == null) {
-                return task.description;
-            } else {
-                return task.key + " - " + task.description;
-            }
+            this.created(task);
         }
     }
 }

@@ -88,44 +88,26 @@ namespace Activities.Model {
         }
 
         private void listen_for_task_changes(Serializer serializer, TaskStore store) {
-            store.row_inserted.connect((path, iter) => {
-                Task task;
-                store.@get(iter, 0, out task);
-                debug("Task Added: " + task.to_string());
-                // TODO : should we even save that?
-                // we can get tasks from existing activities or from the backend
-                // do we really need to serialize them?
+            store.created.connect((path, iter) => {
+                // TODO : serialize here or wait for the activity to be saved?
             });
-
-            store.row_changed.connect((path, iter) => {
-                Task task;
-                store.@get(iter, 0, out task);
-                debug("Task Updated: " + task.to_string());
-                // TODO : should we even save that?
+            store.updated.connect((path, iter) => {
+                // TODO : serialize here or wait for the activity to be saved?
             });
-
-            store.row_deleted.connect((path) => {
-                // TODO : ???
+            store.deleted.connect((path) => {
+                // TODO : serialize here or wait for the activity to be saved?
             });
         }
 
         private void listen_for_activity_changes(Serializer serializer, ActivityStore store) {
-            // That's useless, the value is always null:
-            // http://www.valadoc.org/#!api=gtk+-3.0/Gtk.TreeModel.row_inserted
-            // store.row_inserted.connect((path, iter) => {
-            //     Activity activity;
-            //     store.@get(iter, 0, out activity);
-            //     serializer.create_activity(activity);
-            //});
-
-            store.row_changed.connect((path, iter) => {
-                Activity activity;
-                store.@get(iter, 0, out activity);
+            store.created.connect((activity) => {
+                serializer.create_activity(activity);
+            });
+            store.updated.connect((activity) => {
                 serializer.update_activity(activity);
             });
-
-            store.row_deleted.connect((path) => {
-                // TODO : how do we figure out what was deleted?
+            store.deleted.connect((activity) => {
+                serializer.delete_activity(activity);
             });
         }
 
