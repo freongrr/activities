@@ -25,13 +25,13 @@ namespace Activities.Model {
 
         // TODO : it's silly to have the state in the serializer AND in the store
         private Gee.Map<string, Task> tasks;
-        private Gee.Collection<Activity> activities;
+        private Gee.Map<string, Activity> activities;
         private File file;
         private bool loaded = false;
 
         internal FileSerializer(string project_id) {
             this.tasks = new Gee.HashMap<string, Task>();
-            this.activities = new Gee.LinkedList<Activity>();
+            this.activities = new Gee.HashMap<string, Activity>();
 
             var home = File.new_for_path(Environment.get_home_dir());
             this.file = home.get_child(project_id + "_activities.json");
@@ -48,7 +48,7 @@ namespace Activities.Model {
             if (!loaded) {
                 load_everything();
             }
-            return activities;
+            return activities.values;
         }
 
         private void load_everything() throws SerializationErrors {
@@ -100,7 +100,7 @@ namespace Activities.Model {
                 activity_nodes.get_array().foreach_element((array, index, element_node) => {
                     var activity = this.deserialize_activity(element_node);
                     if (activity != null) {
-                        this.activities.add(activity);
+                        this.activities.@set(activity.local_id, activity);
                     }
                 });
             }
@@ -198,7 +198,7 @@ namespace Activities.Model {
         }
 
         internal void create_activity(Activity activity) {
-            this.activities.add(activity);
+            this.activities.@set(activity.local_id, activity);
             if (activity.task != null) {
                 this.tasks.@set(activity.task.local_id, activity.task);
             }
@@ -208,13 +208,7 @@ namespace Activities.Model {
         internal void update_activity(Activity activity) {
             message("Storing an updated activity: %s", activity.to_string());
 
-            // I have to turn that into a simple warning because new activities can't be
-            // inserted using create_activity() as the store does not give us the value...
-            if (!remove_activity(activity)) {
-                warning("Could not find the activity!");
-            }
-
-            this.activities.add(activity);
+            this.activities.@set(activity.local_id, activity);
             if (activity.task != null) {
                 this.tasks.@set(activity.task.local_id, activity.task);
             }
@@ -224,24 +218,12 @@ namespace Activities.Model {
 
         internal void delete_activity(Activity activity) {
             message("Deleting an activity: %s", activity.to_string());
-            if (!remove_activity(activity)) {
+            if (!activities.unset(activity.local_id)) {
                 warning("Could not find the activity!");
             } else {
                 // TODO : when do we remove unused task?
                 this.save_all();
             }
-        }
-
-        // HACK - can I override equals so that Collection.remove() works?
-        private bool remove_activity(Activity activity) {
-            var local_id = activity.local_id;
-            foreach (var a in this.activities) {
-                if (local_id == a.local_id) {
-                    this.activities.remove(a);
-                    return true;
-                }
-            }
-            return false;
         }
 
         // TODO : it's inefficient to save all every time!
@@ -258,7 +240,7 @@ namespace Activities.Model {
 
             builder.set_member_name("activities");
             builder.begin_array();
-            foreach (var activity in this.activities) {
+            foreach (var activity in this.activities.values) {
                 serialize_activity(builder, activity);
             }
             builder.end_array();
