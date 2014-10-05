@@ -76,10 +76,6 @@ namespace Activities.Model {
             }
         }
 
-        private bool can_save(Activity activity) {
-            return activity.task != null;
-        }
-
         public void delete_record(Activity activity) {
             bool found = false;
             this.@foreach((model, path, iter) => {

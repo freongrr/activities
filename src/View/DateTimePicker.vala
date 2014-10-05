@@ -36,11 +36,6 @@ namespace Activities.View {
                 return this._date_time;
             }
             set {
-                if (value == null) {
-                    debug("New value: null");
-                } else {
-                    debug("New value: %s", value.to_string());
-                }
                 this._date_time = value;
                 refresh_view();
             }

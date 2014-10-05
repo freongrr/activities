@@ -57,6 +57,7 @@ namespace Activities.View {
         private Gtk.TextView notes_text_view;
 
         private Model.Activity? _activity;
+        private bool updating;
 
         internal ActivityDetailView() {
             task_completion = new Gtk.EntryCompletion();
@@ -64,21 +65,26 @@ namespace Activities.View {
             task_completion.set_text_column(1);
             task_completion.set_match_func(match_task);
             task_completion.match_selected.connect((model, iter) => {
-                GLib.Value v;
-                model.get_value(iter, 0, out v);
-                this.set_task((Model.Task) v);
+                if (!updating) {
+                    GLib.Value v;
+                    model.get_value(iter, 0, out v);
+                    this.set_task((Model.Task) v);
+                }
                 return false;
             });
 
             this.task_entry = new Gtk.SearchEntry();
             this.task_entry.set_completion(task_completion);
             this.task_entry.changed.connect(() => {
-                this.set_task_from_description(task_entry.text);
+                if (!updating) {
+                    this.set_task_from_description(task_entry.text);
+                }
             });
 
             this.description_entry = new Gtk.Entry();
             this.description_entry.changed.connect(() => {
-                if (this._activity != null && this._activity.description != this.description_entry.text) {
+                if (!updating && this._activity != null &&
+                      this._activity.description != this.description_entry.text) {
                     this._activity.description = this.description_entry.text;
                     debug("Description changed: %s", this._activity.description);
                     this.changed();
@@ -87,7 +93,8 @@ namespace Activities.View {
 
             this.start_picker = new DateTimePicker();
             this.start_picker.date_time_changed.connect(() => {
-                if (this._activity != null && this._activity.start_date != this.start_picker.date_time) {
+                if (!updating && this._activity != null &&
+                      this._activity.start_date != this.start_picker.date_time) {
                     this._activity.start_date = this.start_picker.date_time;
                     debug("Start date changed: %s", this._activity.start_date.to_string());
                     this.changed();
@@ -96,7 +103,8 @@ namespace Activities.View {
 
             this.end_picker = new DateTimePicker();
             this.end_picker.date_time_changed.connect(() => {
-                if (this._activity != null && this._activity.end_date != this.end_picker.date_time) {
+                if (!updating && this._activity != null &&
+                      this._activity.end_date != this.end_picker.date_time) {
                     this._activity.end_date = this.end_picker.date_time;
                     debug("End date changed: %s", this._activity.end_date.to_string());
                     this.changed();
@@ -105,12 +113,16 @@ namespace Activities.View {
 
             this.tags_entry = new Gtk.Entry();
             this.tags_entry.changed.connect(() => {
-                // TODO
+                if (!updating) {
+                  // TODO
+                }
             });
 
             this.notes_text_view = new Gtk.TextView();
             this.notes_text_view.buffer.changed.connect(() => {
-                // TODO
+                if (updating) {
+                  // TODO
+                }
             });
 
             this.layout();
@@ -156,6 +168,8 @@ namespace Activities.View {
         }
 
         private void update_view() {
+            this.updating = true;
+
             if (this._activity == null) {
                 debug("Update view -> clearing fields");
 
@@ -190,6 +204,8 @@ namespace Activities.View {
                 this.notes_text_view.buffer.text = this._activity.task == null
                     ? "" : this._activity.task.notes;
             }
+
+            this.updating = false;
         }
 
         private string get_tags_as_string() {
