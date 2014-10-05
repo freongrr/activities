@@ -44,8 +44,13 @@ namespace Activities.View {
         }
 
         internal Model.TaskStore task_store {
-            get { return task_store; }
-            set { task_completion.set_model(value); }
+            get {
+                return _task_store;
+            }
+            set {
+                _task_store = value;
+                task_completion.set_model(value);
+            }
         }
 
         private Gtk.EntryCompletion task_completion;
@@ -56,12 +61,12 @@ namespace Activities.View {
         private DateTimePicker end_picker;
         private Gtk.TextView notes_text_view;
 
+        private Model.TaskStore? _task_store;
         private Model.Activity? _activity;
         private bool updating;
 
         internal ActivityDetailView() {
             task_completion = new Gtk.EntryCompletion();
-            // task_completion.set_model(task_store);
             task_completion.set_text_column(1);
             task_completion.set_match_func(match_task);
             task_completion.match_selected.connect((model, iter) => {
@@ -239,25 +244,28 @@ namespace Activities.View {
         }
 
         private void set_task_from_description(string description) {
-            // TODO : move that to TaskStore
+            debug("Description changed: " + description);
+
+            // TODO : we should only edit the description of NEW tasks
+            // we could check for the remote_id, of if the task is used
+
             var task = this._activity.task;
             if (task == null) {
-                // TODO : the view should not be doing that...
-                var local_id = "task";
-                local_id += "_" + new GLib.DateTime.now_utc().to_unix().to_string();
-                local_id += "_" + GLib.Random.int_range(0, 999).to_string();
-                task = new Model.Task(local_id);
+                if (this.task_store == null) {
+                    warning("The store is null");
+                    return;
+                }
+                task = this.task_store.new_task();
+            } else if (task.description == description) {
+                return;
             }
 
-            if (task.description != description) {
-                // TODO : should we get rid of the key?
-                task.key = "???";
-                task.description = description;
+            // TODO : update the store?
+            task.description = description;
 
-                debug("Task edited: " + task.to_string());
-                this._activity.task = task;
-                this.changed();
-            }
+            debug("Task edited: " + task.to_string());
+            this._activity.task = task;
+            this.changed();
         }
     }
 }

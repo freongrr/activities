@@ -45,11 +45,29 @@ namespace Activities.Model {
             this.add(task);
         }
 
+        public Task new_task() {
+            var local_id = "task";
+            local_id += "_" + new GLib.DateTime.now_utc().to_unix().to_string();
+            local_id += "_" + GLib.Random.int_range(0, 999).to_string();
+
+            var task = new Task(local_id);
+            add(task);
+            return task;
+        }
+
         public void add(Task task) {
             Gtk.TreeIter iter;
             this.append(out iter);
             this.@set(iter, 0, task);
-            this.@set(iter, 1, task.key + " - " + task.description);
+            this.@set(iter, 1, label(task));
+        }
+
+        private string label(Task task) {
+            if (task.key == null) {
+                return task.description;
+            } else {
+                return task.key + " - " + task.description;
+            }
         }
     }
 }
