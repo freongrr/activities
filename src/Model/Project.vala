@@ -26,13 +26,16 @@ namespace Activities.Model {
         public string id { get; private set; }
         public string name { get; private set; }
         public Backend backend { get; private set; }
-        public ActivityStore store { get; private set; }
+        public TaskStore task_store { get; private set; }
+        public ActivityStore activity_store { get; private set; }
 
-        internal Project(string id, string name, Backend backend, ActivityStore store) {
+        internal Project(string id, string name, Backend backend,
+                TaskStore task_store, ActivityStore activity_store) {
             this.id = id;
             this.name = name;
             this.backend = backend;
-            this.store = store;
+            this.task_store = task_store;
+            this.activity_store = activity_store;
         }
     }
 }

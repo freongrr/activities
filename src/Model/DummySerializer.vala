@@ -23,7 +23,8 @@ namespace Activities.Model {
 
     internal class DummySerializer : Object, Serializer {
 
-        internal Gee.Collection<Activity> activities { get; set; }
+        private Gee.Collection<Task> tasks;
+        private Gee.Collection<Activity> activities;
 
         internal DummySerializer(string project_id) {
             this.activities = new Gee.LinkedList<Activity>();
@@ -36,6 +37,7 @@ namespace Activities.Model {
                 task.key = "TK-01";
                 task.description = "Reading email";
                 task.closed = false;
+                tasks.add(task);
 
                 var activity = new Model.Activity("a1");
                 activity.description = "";
@@ -51,6 +53,7 @@ namespace Activities.Model {
                 task.description = "Project A";
                 task.notes = "TODO :\n - specs\n - ???\n - profit";
                 task.closed = false;
+                tasks.add(task);
 
                 activity = new Model.Activity("a2");
                 activity.description = "Work on project A";
@@ -66,6 +69,10 @@ namespace Activities.Model {
                 activity.end_date = new DateTime.local(2013, 12, 24, 10, 30, 0);
                 this.activities.add(activity);
             }
+        }
+
+        internal Gee.Collection<Task> load_tasks() {
+            return this.tasks;
         }
 
         internal Gee.Collection<Activity> load_activities() {

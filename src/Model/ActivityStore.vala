@@ -21,11 +21,8 @@
 
 namespace Activities.Model {
 
-    // TODO : interface
     public class ActivityStore : Gtk.ListStore {
 
-        // TODO : the serializer should not be there - it should listen for the store events
-        internal Serializer? serializer;
         internal DateTime? last_synchronization;
 
         public ActivityStore() {
@@ -58,12 +55,6 @@ namespace Activities.Model {
             Gtk.TreeIter iter;
             this.append(out iter);
             this.set_value(iter, 0, activity);
-
-            if (this.serializer != null) {
-                if (this.can_save(activity)) {
-                    this.serializer.create_activity(activity);
-                }
-            }
         }
 
         public void update_record(Activity activity) {
@@ -82,10 +73,6 @@ namespace Activities.Model {
 
             if (!found) {
                 warning("Could not find the activity to update in the store");
-            } else if (this.serializer != null) {
-                if (this.can_save(activity)) {
-                    this.serializer.update_activity(activity);
-                }
             }
         }
 
@@ -109,8 +96,6 @@ namespace Activities.Model {
 
             if (!found) {
                 warning("Could not find the activity to remove in the store");
-            } else if (this.serializer != null) {
-                this.serializer.delete_activity(activity);
             }
         }
     }

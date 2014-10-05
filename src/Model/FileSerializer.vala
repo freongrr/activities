@@ -24,9 +24,10 @@ namespace Activities.Model {
     internal class FileSerializer : Object, Serializer {
 
         // TODO : it's silly to have the state in the serializer AND in the store
-        internal Gee.Map<string, Task> tasks;
-        internal Gee.Collection<Activity> activities;
-        internal File file;
+        private Gee.Map<string, Task> tasks;
+        private Gee.Collection<Activity> activities;
+        private File file;
+        private bool loaded = false;
 
         internal FileSerializer(string project_id) {
             this.tasks = new Gee.HashMap<string, Task>();
@@ -36,17 +37,31 @@ namespace Activities.Model {
             this.file = home.get_child(project_id + "_activities.json");
         }
 
+        internal Gee.Collection<Task> load_tasks() throws SerializationErrors {
+            if (!loaded) {
+                load_everything();
+            }
+            return tasks.values;
+        }
+
         internal Gee.Collection<Activity> load_activities() throws SerializationErrors {
+            if (!loaded) {
+                load_everything();
+            }
+            return activities;
+        }
+
+        private void load_everything() throws SerializationErrors {
             this.tasks.clear();
             this.activities.clear();
 
-            message("Loading activities from: %s", this.file.get_parse_name());
+            message("Loading from %s", this.file.get_parse_name());
             if (!this.file.query_exists()) {
 		        throw new SerializationErrors.FILE_NOT_FOUND(
                     "File not found: %s", this.file.get_parse_name());
             }
 
-            message("Parsing...");
+            debug("Parsing...");
             var parser = new Json.Parser();
             try {
                 parser.load_from_file(this.file.get_path());
@@ -56,13 +71,11 @@ namespace Activities.Model {
         	}
 
             var root = parser.get_root();
-            debug("Root = " + root.type_name());
             if (root.get_node_type () != Json.NodeType.OBJECT) {
                 throw new SerializationErrors.INVALID_FORMAT("Root should be an object");
             }
 
             var task_nodes = root.get_object().get_member("tasks");
-            debug("Tasks = " + (task_nodes == null ? "null" : task_nodes.type_name()));
             if (task_nodes != null) {
                 if (task_nodes.get_node_type() != Json.NodeType.ARRAY) {
                     throw new SerializationErrors.INVALID_FORMAT(
@@ -78,7 +91,6 @@ namespace Activities.Model {
             }
 
             var activity_nodes = root.get_object().get_member("activities");
-            debug("Activities = " + (activity_nodes == null ? "null" : activity_nodes.type_name()));
             if (activity_nodes != null) {
                 if (activity_nodes.get_node_type() != Json.NodeType.ARRAY) {
                     throw new SerializationErrors.INVALID_FORMAT(
@@ -93,7 +105,7 @@ namespace Activities.Model {
                 });
             }
 
-            return this.activities;
+            loaded = true;
         }
 
         private Task? deserialize_task(Json.Node node) {
@@ -186,7 +198,6 @@ namespace Activities.Model {
         }
 
         internal void create_activity(Activity activity) {
-            message("Storing a new activity: %s", activity.to_string());
             this.activities.add(activity);
             if (activity.task != null) {
                 this.tasks.@set(activity.task.local_id, activity.task);
@@ -196,25 +207,41 @@ namespace Activities.Model {
 
         internal void update_activity(Activity activity) {
             message("Storing an updated activity: %s", activity.to_string());
-            if (this.activities.remove(activity)) {
-                this.activities.add(activity);
-                if (activity.task != null) {
-                    this.tasks.@set(activity.task.local_id, activity.task);
-                }
-                this.save_all();
-            } else {
+
+            // I have to turn that into a simple warning because new activities can't be
+            // inserted using create_activity() as the store does not give us the value...
+            if (!remove_activity(activity)) {
                 warning("Could not find the activity!");
             }
+
+            this.activities.add(activity);
+            if (activity.task != null) {
+                this.tasks.@set(activity.task.local_id, activity.task);
+            }
+
+            this.save_all();
         }
 
         internal void delete_activity(Activity activity) {
             message("Deleting an activity: %s", activity.to_string());
-            if (this.activities.remove(activity)) {
-                // TODO : when do we remove activities?
-                this.save_all();
-            } else {
+            if (!remove_activity(activity)) {
                 warning("Could not find the activity!");
+            } else {
+                // TODO : when do we remove unused task?
+                this.save_all();
             }
+        }
+
+        // HACK - can I override equals so that Collection.remove() works?
+        private bool remove_activity(Activity activity) {
+            var local_id = activity.local_id;
+            foreach (var a in this.activities) {
+                if (local_id == a.local_id) {
+                    this.activities.remove(a);
+                    return true;
+                }
+            }
+            return false;
         }
 
         // TODO : it's inefficient to save all every time!
@@ -277,7 +304,7 @@ namespace Activities.Model {
 
             if (activity.task != null) {
                 builder.set_member_name("task_id");
-                builder.add_string_value(activity.description);
+                builder.add_string_value(activity.task.local_id);
             }
 
             if (activity.start_date != null) {

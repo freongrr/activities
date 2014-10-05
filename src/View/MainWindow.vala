@@ -38,9 +38,11 @@ namespace Activities.View {
                     // TODO !
                     debug("Showing project: NULL\n");
                     this.activity_list.model = new Model.ActivityStore();
+                    this.activity_detail_view.task_store = new Model.TaskStore();
                 } else {
                     debug("Showing project: %s\n", value.name);
-                    this.activity_list.model = value.store;
+                    this.activity_list.model = value.activity_store;
+                    this.activity_detail_view.task_store = value.task_store;
                 }
                 this.project_selected(value);
             }

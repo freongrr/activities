@@ -27,8 +27,9 @@ namespace Activities.Model {
 
     internal interface Serializer : Object {
 
-        internal abstract Gee.Collection<Activity> load_activities() throws SerializationErrors;
+        internal abstract Gee.Collection<Task> load_tasks() throws SerializationErrors;
 
+        internal abstract Gee.Collection<Activity> load_activities() throws SerializationErrors;
         internal abstract void create_activity(Activity activity);
         internal abstract void update_activity(Activity activity);
         internal abstract void delete_activity(Activity activity);

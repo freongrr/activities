@@ -43,6 +43,12 @@ namespace Activities.View {
             }
         }
 
+        internal Model.TaskStore task_store {
+            get { return task_store; }
+            set { task_completion.set_model(value); }
+        }
+
+        private Gtk.EntryCompletion task_completion;
         private Gtk.Entry task_entry;
         private Gtk.Entry description_entry;
         private Gtk.Entry tags_entry;
@@ -53,11 +59,11 @@ namespace Activities.View {
         private Model.Activity? _activity;
 
         internal ActivityDetailView() {
-            var completion = new Gtk.EntryCompletion();
-            completion.set_model(new TaskStore());
-            completion.set_text_column(1);
-            completion.set_match_func(match_task);
-            completion.match_selected.connect((model, iter) => {
+            task_completion = new Gtk.EntryCompletion();
+            // task_completion.set_model(task_store);
+            task_completion.set_text_column(1);
+            task_completion.set_match_func(match_task);
+            task_completion.match_selected.connect((model, iter) => {
                 GLib.Value v;
                 model.get_value(iter, 0, out v);
                 this.set_task((Model.Task) v);
@@ -65,7 +71,7 @@ namespace Activities.View {
             });
 
             this.task_entry = new Gtk.SearchEntry();
-            this.task_entry.set_completion(completion);
+            this.task_entry.set_completion(task_completion);
             this.task_entry.changed.connect(() => {
                 this.set_task_from_description(task_entry.text);
             });
@@ -217,6 +223,7 @@ namespace Activities.View {
         }
 
         private void set_task_from_description(string description) {
+            // TODO : move that to TaskStore
             var task = this._activity.task;
             if (task == null) {
                 // TODO : the view should not be doing that...
@@ -235,38 +242,6 @@ namespace Activities.View {
                 this._activity.task = task;
                 this.changed();
             }
-        }
-    }
-
-    private class TaskStore : Gtk.ListStore {
-
-        internal TaskStore() {
-            this.set_column_types({typeof (Model.Task), typeof (string)});
-
-            var task = new Model.Task("t1");
-            task.key = "T-1";
-            task.description = "Task 1";
-
-            this.add(task);
-
-            task = new Model.Task("t2");
-            task.key = "T-2";
-            task.description = "Second task";
-
-            this.add(task);
-
-            task = new Model.Task("t3");
-            task.key = "T-3";
-            task.description = "Third task";
-
-            this.add(task);
-        }
-
-        private void add(Model.Task task) {
-            Gtk.TreeIter iter;
-            this.append(out iter);
-            this.@set(iter, 0, task);
-            this.@set(iter, 1, task.key + " - " + task.description);
         }
     }
 }

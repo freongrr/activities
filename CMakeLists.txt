@@ -52,6 +52,7 @@ vala_precompile (VALA_C ${EXEC_NAME}
     src/Model/RemoteBackend.vala
     src/Model/Serializer.vala
     src/Model/Task.vala
+    src/Model/TaskStore.vala
     src/Settings/ProjectDefinitions.vala
     src/Settings/SavedState.vala
     src/Utils/UrlBuilder.vala

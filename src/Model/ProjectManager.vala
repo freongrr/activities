@@ -57,29 +57,76 @@ namespace Activities.Model {
 
         // TODO : not sure this method should be public...
         public Project create_project(string project_id, string project_name, Backend backend) {
-            var store = new ActivityStore();
+            var activity_store = new ActivityStore();
+            var task_store = new TaskStore();
 
             // Populate the store using the Serializer
             var serializer = new FileSerializer(project_id);
 
             try {
+                var tasks = serializer.load_tasks();
+                foreach (var t in tasks) {
+                    task_store.add(t);
+                }
                 var activities = serializer.load_activities();
                 foreach (var a in activities) {
-                    store.add_record(a);
+                    activity_store.add_record(a);
                 }
             } catch (SerializationErrors e) {
                 if (e is SerializationErrors.FILE_NOT_FOUND) {
                     message("Nothing to deserialize: %s", e.message);
                 } else {
-                    critical("Could not deserialize the activities: %s", e.message);
+                    critical("Could not deserialize the tasks/activities: %s", e.message);
                 }
             }
 
-            // Set the serializer after populating the store to avoid saving the activities for nothing
-            store.serializer = serializer;
+            listen_for_task_changes(serializer, task_store);
+            listen_for_activity_changes(serializer, activity_store);
 
             // And shove it all in a Project
-            return new Project(project_id, project_name, backend, store);
+            return new Project(project_id, project_name, backend, task_store, activity_store);
+        }
+
+        private void listen_for_task_changes(Serializer serializer, TaskStore store) {
+            store.row_inserted.connect((path, iter) => {
+                Task task;
+                store.@get(iter, 0, out task);
+                debug("Task Added: " + task.to_string());
+                // TODO : should we even save that?
+                // we can get tasks from existing activities or from the backend
+                // do we really need to serialize them?
+            });
+
+            store.row_changed.connect((path, iter) => {
+                Task task;
+                store.@get(iter, 0, out task);
+                debug("Task Updated: " + task.to_string());
+                // TODO : should we even save that?
+            });
+
+            store.row_deleted.connect((path) => {
+                // TODO : ???
+            });
+        }
+
+        private void listen_for_activity_changes(Serializer serializer, ActivityStore store) {
+            // That's useless, the value is always null:
+            // http://www.valadoc.org/#!api=gtk+-3.0/Gtk.TreeModel.row_inserted
+            // store.row_inserted.connect((path, iter) => {
+            //     Activity activity;
+            //     store.@get(iter, 0, out activity);
+            //     serializer.create_activity(activity);
+            //});
+
+            store.row_changed.connect((path, iter) => {
+                Activity activity;
+                store.@get(iter, 0, out activity);
+                serializer.update_activity(activity);
+            });
+
+            store.row_deleted.connect((path) => {
+                // TODO : how do we figure out what was deleted?
+            });
         }
 
         public void add_project(Project project) {
