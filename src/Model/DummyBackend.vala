@@ -19,9 +19,58 @@
   END LICENSE
 ***/
 
+using Gee;
+
 namespace Activities.Model {
 
     public class DummyBackend : Object, Backend {
+
+        private Collection<Task> tasks;
+        private Collection<Activity> activities;
+
+        public DummyBackend() {
+            this.tasks = new ArrayList<Task>();
+            this.activities = new ArrayList<Activity>();
+
+            var task1 = new Task("t1");
+            task1.key = "TK-01";
+            task1.description = "Reading email";
+            task1.closed = false;
+            this.tasks.add(task1);
+
+            var task2 = new Task("t2");
+            task2.key = "TK-08";
+            task2.description = "Project A";
+            task2.notes = "TODO :\n - specs\n - ???\n - profit";
+            task2.closed = false;
+            this.tasks.add(task2);
+
+            var task3 = new Task("t3");
+            task3.key = null;
+            task3.description = "Important Project";
+            this.tasks.add(task3);
+
+            var activity = new Model.Activity("a1");
+            activity.description = "";
+            activity.task = task2;
+            activity.start_date = new DateTime.local(2013, 12, 25, 9, 0, 0);
+            activity.end_date = new DateTime.local(2013, 12, 25, 12, 0, 0);
+            this.activities.add(activity);
+
+            activity = new Model.Activity("a2");
+            activity.description = "Work on project A";
+            activity.task = task2;
+            activity.start_date = new DateTime.local(2013, 12, 25, 13, 0, 0);
+            activity.end_date = new DateTime.local(2013, 12, 25, 17, 30, 0);
+            this.activities.add(activity);
+
+            activity = new Model.Activity("a3");
+            activity.description = "Bug fixing";
+            activity.task = task2;
+            activity.start_date = new DateTime.local(2013, 12, 24, 9, 15, 0);
+            activity.end_date = new DateTime.local(2013, 12, 24, 10, 30, 0);
+            this.activities.add(activity);
+        }
 
         public string get_id() {
             return "dummy_backend";
@@ -35,12 +84,18 @@ namespace Activities.Model {
             return "dummy-backend-icon";
         }
 
-        public void synchronize(ActivityStore activity_store) {
-            // NO OP
+        public void synchronize_tasks(TaskStore task_store) {
+            task_store.clear();
+            foreach (var t in this.tasks) {
+                task_store.add(t);
+            }
         }
 
-        public Gee.Collection<Task> find_tasks(string query) {
-            return new Gee.ArrayList<Task>();
+        public void synchronize_activities(ActivityStore activity_store) {
+            activity_store.clear();
+            foreach (var a in this.activities) {
+                activity_store.add(a);
+            }
         }
-     }
+    }
 }

@@ -177,7 +177,11 @@ namespace Activities.View {
         private void render_task(Model.Activity activity) {
             string text = "NULL";
             if (activity != null && activity.task != null) {
-                text = activity.task.key + " - " + activity.task.description;
+                if (activity.task.key != null) {
+                    text = activity.task.key + " - " + activity.task.description;
+                } else {
+                    text = activity.task.description;
+                }
             }
 
             Pango.FontDescription font = new Pango.FontDescription();

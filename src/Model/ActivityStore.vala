@@ -19,10 +19,14 @@
   END LICENSE
 ***/
 
+using Gee;
+using Gtk;
+
 namespace Activities.Model {
 
     public class ActivityStore : Gtk.ListStore {
 
+        // HACK - I would not need that if ListStore even gave me the created/deleted values...
         public signal void created(Activity activity);
         public signal void updated(Activity activity);
         public signal void deleted(Activity activity);
@@ -32,10 +36,10 @@ namespace Activities.Model {
         public ActivityStore() {
             this.set_column_types({typeof (Activity)});
             this.set_default_sort_func(sort_by_date);
-            this.set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
+            this.set_sort_column_id(SortColumn.DEFAULT, SortType.DESCENDING);
         }
 
-        private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter iter_a, Gtk.TreeIter iter_b) {
+        private int sort_by_date(TreeModel model, TreeIter iter_a, TreeIter iter_b) {
             GLib.Value value_a;
             this.get_value(iter_a, 0, out value_a);
 
@@ -54,55 +58,74 @@ namespace Activities.Model {
             }
         }
 
-        public void add_record(Activity activity) {
-            message("Adding an activity in the store");
+        public Activity new_activity() {
+            var local_id = "activity";
+            local_id += "_" + new GLib.DateTime.now_utc().to_unix().to_string();
+            local_id += "_" + GLib.Random.int_range(0, 999).to_string();
+
+            var activity = new Activity(local_id);
+            add(activity);
+            return activity;
+        }
+
+        public bool contains(Activity activity) {
+            return find(activity) != null;
+        }
+
+        private TreeIter? find(Activity activity) {
+            TreeIter? found = null;
+            this.@foreach((model, path, iter) => {
+                GLib.Value v;
+                this.get_value(iter, 0, out v);
+                if (activity.local_id == ((Activity) v).local_id ||
+                    activity.remote_id != null && activity.remote_id == ((Activity) v).remote_id) {
+                    found = iter;
+                    return true;
+                }
+                return false;
+            });
+            return found;
+        }
+
+        public void add(Activity activity) {
+            if (contains(activity)) {
+                warning("%s is already in the store", activity.to_string());
+                return;
+            }
+
+            debug("Adding to the store: %s", activity.to_string());
+
             Gtk.TreeIter iter;
             this.append(out iter);
-            this.set_value(iter, 0, activity);
+            this.@set(iter, 0, activity);
 
             this.created(activity);
         }
 
-        public void update_record(Activity activity) {
-            bool found = false;
-            this.@foreach((model, path, iter) => {
-                GLib.Value v;
-                this.get_value(iter, 0, out v);
-                if (activity.local_id == ((Activity) v).local_id) {
-                    found = true;
-                    message("Updating the activity in the store");
-                    this.set_value(iter, 0, activity);
-                    return true;
-                }
-                return false;
-            });
-
-            if (found) {
-                this.updated(activity);
-            } else {
-                warning("Could not find the activity to update in the store");
+        public void update(Activity activity) {
+            var iter = find(activity);
+            if (iter == null) {
+                warning("Can't find %s in the store", activity.to_string());
+                return;
             }
+
+            debug("Updating the store: %s", activity.to_string());
+            this.@set(iter, 0, activity);
+
+            this.updated(activity);
         }
 
-        public void delete_record(Activity activity) {
-            bool found = false;
-            this.@foreach((model, path, iter) => {
-                GLib.Value v;
-                this.get_value(iter, 0, out v);
-                if (activity.local_id == ((Activity) v).local_id) {
-                    found = true;
-                    message("Removing the activity in the store");
-                    this.remove(iter);
-                    return true;
-                }
-                return false;
-            });
-
-            if (found) {
-                this.deleted(activity);
-            } else {
-                warning("Could not find the activity to remove in the store");
+        public void @delete(Activity activity) {
+            var iter = find(activity);
+            if (iter == null) {
+                warning("Can't find %s in the store", activity.to_string());
+                return;
             }
+
+            debug("Removing in the store: %s", activity.to_string());
+            this.remove(iter);
+
+            this.deleted(activity);
         }
     }
 }

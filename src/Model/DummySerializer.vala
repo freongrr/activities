@@ -19,64 +19,18 @@
   END LICENSE
 ***/
 
+using Gee;
+
 namespace Activities.Model {
 
     internal class DummySerializer : Object, Serializer {
 
-        private Gee.Collection<Task> tasks;
-        private Gee.Collection<Activity> activities;
-
-        internal DummySerializer(string project_id) {
-            this.activities = new Gee.LinkedList<Activity>();
-
-            if (project_id == "dummy_project") {
-
-                // Task 1
-
-                var task = new Task("t1");
-                task.key = "TK-01";
-                task.description = "Reading email";
-                task.closed = false;
-                tasks.add(task);
-
-                var activity = new Model.Activity("a1");
-                activity.description = "";
-                activity.task = task;
-                activity.start_date = new DateTime.local(2013, 12, 25, 9, 0, 0);
-                activity.end_date = new DateTime.local(2013, 12, 25, 12, 0, 0);
-                this.activities.add(activity);
-
-                // Task 2
-
-                task = new Task("t2");
-                task.key = "TK-08";
-                task.description = "Project A";
-                task.notes = "TODO :\n - specs\n - ???\n - profit";
-                task.closed = false;
-                tasks.add(task);
-
-                activity = new Model.Activity("a2");
-                activity.description = "Work on project A";
-                activity.task = task;
-                activity.start_date = new DateTime.local(2013, 12, 25, 13, 0, 0);
-                activity.end_date = new DateTime.local(2013, 12, 25, 17, 30, 0);
-                this.activities.add(activity);
-
-                activity = new Model.Activity("a3");
-                activity.description = "Bug fixing";
-                activity.task = task;
-                activity.start_date = new DateTime.local(2013, 12, 24, 9, 15, 0);
-                activity.end_date = new DateTime.local(2013, 12, 24, 10, 30, 0);
-                this.activities.add(activity);
-            }
+        internal Collection<Task> load_tasks() {
+            return new ArrayList<Task>();
         }
 
-        internal Gee.Collection<Task> load_tasks() {
-            return this.tasks;
-        }
-
-        internal Gee.Collection<Activity> load_activities() {
-            return this.activities;
+        internal Collection<Activity> load_activities() {
+            return new ArrayList<Activity>();
         }
 
         internal void create_activity(Activity activity) {

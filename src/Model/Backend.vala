@@ -27,8 +27,8 @@ namespace Activities.Model {
         public abstract string get_name();
         public abstract string get_icon_name();
 
-        public abstract void synchronize(ActivityStore activity_store);
+        public abstract void synchronize_tasks(TaskStore task_store);
 
-        public abstract Gee.Collection<Task> find_tasks(string query);
+        public abstract void synchronize_activities(ActivityStore activity_store);
      }
 }

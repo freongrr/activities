@@ -19,34 +19,22 @@
   END LICENSE
 ***/
 
+using Gee;
+using Gtk;
+
 namespace Activities.Model {
 
-    public class TaskStore : Gtk.ListStore {
+    public class TaskStore : ListStore {
 
+        // HACK - I would not need that if ListStore even gave me the created/deleted values...
         public signal void created(Task task);
         public signal void updated(Task task);
         public signal void deleted(Task task);
 
+        internal DateTime? last_synchronization;
+
         public TaskStore() {
             this.set_column_types({typeof (Model.Task), typeof (string)});
-
-            var task = new Model.Task("t1");
-            task.key = "T-1";
-            task.description = "Task 1";
-
-            this.add(task);
-
-            task = new Model.Task("t2");
-            task.key = "T-2";
-            task.description = "Second task";
-
-            this.add(task);
-
-            task = new Model.Task("t3");
-            task.key = "T-3";
-            task.description = "Third task";
-
-            this.add(task);
         }
 
         public Task new_task() {
@@ -59,13 +47,53 @@ namespace Activities.Model {
             return task;
         }
 
+        public bool contains(Task task) {
+            return find(task) != null;
+        }
+
+        private TreeIter? find(Task task) {
+            TreeIter? found = null;
+            this.@foreach((model, path, iter) => {
+                GLib.Value v;
+                this.get_value(iter, 0, out v);
+                if (task.local_id == ((Task) v).local_id ||
+                    task.remote_id != null && task.remote_id == ((Task) v).remote_id) {
+                    found = iter;
+                    return true;
+                }
+                return false;
+            });
+            return found;
+        }
+
         public void add(Task task) {
+            if (contains(task)) {
+                warning("%s is already in the store", task.to_string());
+                return;
+            }
+
+            debug("Adding to the store: %s", task.to_string());
+
             Gtk.TreeIter iter;
             this.append(out iter);
             this.@set(iter, 0, task);
             this.@set(iter, 1, task.description);
 
             this.created(task);
+        }
+
+        public void update(Task task) {
+            var iter = find(task);
+            if (iter == null) {
+                warning("Can't find %s in the store", task.to_string());
+                return;
+            }
+
+            debug("Updating the store: %s", task.to_string());
+            this.@set(iter, 0, task);
+            this.@set(iter, 1, task.description);
+
+            this.updated(task);
         }
     }
 }

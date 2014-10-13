@@ -108,7 +108,7 @@ namespace Activities {
                 // TODO : update the store here or in the view?
                 if (this.main_window.visible_project != null) {
                     var store = this.main_window.visible_project.activity_store;
-                    store.update_record(a);
+                    store.update(a);
                 }
             });
 
@@ -202,21 +202,16 @@ namespace Activities {
             message("Synchronizing...");
             foreach (var project in this.project_manager.projects) {
                 debug("Synchronizing project %s...", project.name);
-                // TODO : synchronize tasks too
-                project.backend.synchronize(project.activity_store);
+                project.backend.synchronize_tasks(project.task_store);
+                project.backend.synchronize_activities(project.activity_store);
             }
             message("Done");
         }
 
         private void on_new_activity() {
             message("New Activity");
-            var local_id = "activity";
-            local_id += "_" + new GLib.DateTime.now_utc().to_unix().to_string();
-            local_id += "_" + GLib.Random.int_range(0, 999).to_string();
-
-            var activity = new Model.Activity(local_id);
             var project = this.main_window.visible_project;
-            project.activity_store.add_record(activity);
+            var activity = project.activity_store.new_activity();
             this.main_window.visible_activity = activity;
         }
 
@@ -224,7 +219,7 @@ namespace Activities {
             var project = this.main_window.visible_project;
             var activity = this.main_window.visible_activity;
             if (project != null && activity != null) {
-                project.activity_store.delete_record(activity);
+                project.activity_store.delete(activity);
             }
         }
     }

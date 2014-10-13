@@ -19,6 +19,9 @@
   END LICENSE
 ***/
 
+using Gee;
+using Soup;
+
 namespace Activities.Model {
 
     errordomain JIRAErrors {
@@ -27,6 +30,7 @@ namespace Activities.Model {
 
     public class JIRABackend : RemoteBackend {
 
+        // TODO : Change that obviously...
         private static const string DEFAULT_LOCATION = "http://jira.dev.tradingscreen.com:8080";
 
         private string username;
@@ -63,12 +67,31 @@ namespace Activities.Model {
             return "TODO";
         }
 
-        public override Gee.Collection<Task> find_tasks(string query) {
-            // TODO
-            return new Gee.ArrayList<Task>();
+        public override Collection<Task> fetch_tasks(int days) {
+            // TODO - query tasks assigned to the user
+            message("Querying tasks");
+
+            var tasks = new Gee.HashSet<Task>(
+                // hash func
+                (t) => {
+                    return t.remote_id.hash();
+                },
+                // equal func
+                (t1, t2) => {
+                    return t1.remote_id == t2.remote_id;
+                });
+
+            var activities = fetch_activities(days);
+            foreach (var a in activities) {
+                if (a.task != null) {
+                    tasks.add(a.task);
+                }
+            }
+
+            return tasks;
         }
 
-        protected override Gee.Collection<Activity> fetch_activities(int days) {
+        protected override Collection<Activity> fetch_activities(int days) {
             try {
                 return this.search("SP", days, 0, 99);
             } catch (JIRAErrors e) {

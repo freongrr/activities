@@ -23,9 +23,29 @@ namespace Activities.Model {
 
     public abstract class RemoteBackend : Object, Backend {
 
-        public void synchronize(ActivityStore activity_store) {
-            debug("[%s] Starting synchronization", get_id());
-            // TODO : how do I prevent modifications while synchronize
+        // TODO : how do I prevent modifications while synchronize
+
+        public void synchronize_tasks(TaskStore store) {
+            message("[%s] Starting synchronization", get_id());
+
+            // TODO : just a work in progress...
+            var remote_tasks = fetch_tasks(30);
+            foreach (var t in remote_tasks) {
+                if (store.contains(t)) {
+                    store.update(t);
+                } else {
+                    store.add(t);
+                }
+            }
+
+            // TODO : delete outdated tasks
+            // TODO : push new tasks out
+
+            store.last_synchronization = new DateTime.now_local();
+        }
+
+        public void synchronize_activities(ActivityStore activity_store) {
+            message("[%s] Starting synchronization", get_id());
             this.merge_remote_changes(activity_store);
             this.push_local_changes(activity_store);
 
@@ -38,13 +58,13 @@ namespace Activities.Model {
                 var local_activity = this.find_local_activity(activity_store, remote_activity.remote_id);
                 if (local_activity == null) {
                     debug("[%s] Adding remote activity: %s", get_id(), remote_activity.to_string());
-                    activity_store.add_record(remote_activity);
+                    activity_store.add(remote_activity);
                 } else if (this.is_pending_synchronization(local_activity)) {
                     warning("[%s] Conflicting activity: %s", get_id(), remote_activity.to_string());
                     // TODO : how do we handle conflicts?
                 } else {
                     debug("[%s] Updating local activity: %s", get_id(), remote_activity.to_string());
-                    activity_store.update_record(remote_activity);
+                    activity_store.update(remote_activity);
                 }
             }
 
@@ -112,10 +132,11 @@ namespace Activities.Model {
         public abstract string get_id();
         public abstract string get_name();
         public abstract string get_icon_name();
-        public abstract Gee.Collection<Task> find_tasks(string query);
 
-        // TODO : this one should be async
+        // TODO : these ones should be async
+        protected abstract Gee.Collection<Task> fetch_tasks(int days);
         protected abstract Gee.Collection<Activity> fetch_activities(int days);
+
         protected abstract void create_remote_activity(Activity activity);
         protected abstract void update_remote_activity(Activity activity);
         protected abstract void delete_remote_activity(Activity activity);

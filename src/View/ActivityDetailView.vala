@@ -45,13 +45,14 @@ namespace Activities.View {
 
         internal Model.TaskStore task_store {
             get {
-                return _task_store;
+                return (Model.TaskStore) task_completion.get_model();
             }
             set {
-                _task_store = value;
                 task_completion.set_model(value);
             }
         }
+
+        internal Model.Backend backend;
 
         private Gtk.EntryCompletion task_completion;
         private Gtk.Entry task_entry;
@@ -61,12 +62,12 @@ namespace Activities.View {
         private DateTimePicker end_picker;
         private Gtk.TextView notes_text_view;
 
-        private Model.TaskStore? _task_store;
         private Model.Activity? _activity;
         private bool updating;
 
         internal ActivityDetailView() {
             task_completion = new Gtk.EntryCompletion();
+            task_completion.set_model(new Model.TaskStore());
             task_completion.set_text_column(1);
             task_completion.set_match_func(match_task);
             task_completion.match_selected.connect((model, iter) => {
@@ -200,8 +201,17 @@ namespace Activities.View {
                 this.start_picker.sensitive = true;
                 this.end_picker.sensitive = true;
 
-                this.task_entry.text = this._activity.task == null
-                    ? "" : (this._activity.task.key + " - " + this._activity.task.description);
+                var task = this._activity.task;
+                if (task != null) {
+                    if (task.key != null) {
+                        this.task_entry.text = task.key + " - " + task.description;
+                    } else {
+                        this.task_entry.text = task.description;
+                    }
+                } else {
+                    this.task_entry.text = "";
+                }
+
                 this.description_entry.text = this._activity.description;
                 this.tags_entry.text = this.get_tags_as_string();
                 this.start_picker.date_time = this._activity.start_date;
@@ -223,15 +233,21 @@ namespace Activities.View {
             return builder.str;
         }
 
-        private bool match_task(Gtk.EntryCompletion completion, string key, Gtk.TreeIter iter) {
-            var down_key = key.down();
+        private bool match_task(Gtk.EntryCompletion completion, string query, Gtk.TreeIter iter) {
+            var lower_case_query = query.down();
 
             GLib.Value store_value;
             completion.model.get_value(iter, 0, out store_value);
 
             var task = (Model.Task) store_value;
-            return task.key.down().contains(down_key) ||
-                    task.description.down().contains(down_key);
+            try {
+                return (task.key != null && task.key.down().contains(lower_case_query)) ||
+                    task.description.down().contains(lower_case_query);
+            } catch (Error e) {
+                critical("Error while testing task: " +
+                    (task == null ? "NULL" : task.to_string()), e);
+                return false;
+            }
         }
 
         private void set_task(Model.Task new_task) {

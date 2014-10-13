@@ -70,7 +70,7 @@ namespace Activities.Model {
                 }
                 var activities = serializer.load_activities();
                 foreach (var a in activities) {
-                    activity_store.add_record(a);
+                    activity_store.add(a);
                 }
             } catch (SerializationErrors e) {
                 if (e is SerializationErrors.FILE_NOT_FOUND) {

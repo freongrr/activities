@@ -21,6 +21,8 @@
 
 namespace Activities.Model {
 
+    // TODO : status
+
     public class Task : GLib.Object {
 
         internal string local_id { public get; set; }
