@@ -45,6 +45,7 @@ namespace Activities {
             this.app_icon = "preferences-system-time";
             this.app_launcher = "activities.desktop";
 
+            // TODO : update
             this.main_url = "https://launchpad.net/~fabien.cortina";
             this.bug_url = "https://bugs.launchpad.net/~fabien.cortina";
             this.help_url = "https://answers.launchpad.net/~fabien.cortina";
@@ -248,8 +249,9 @@ namespace Activities {
         return app.run(args);
     }
 
-    private static const OptionEntry[] command_line_options = {
+    private const OptionEntry[] command_line_options = {
         { "version", 'v', 0, OptionArg.NONE, out CommandLineOption.VERSION, "Print version info and exit", null },
         { null }
     };
 }
+

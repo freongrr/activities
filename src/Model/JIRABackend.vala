@@ -31,7 +31,7 @@ namespace Activities.Model {
     public class JIRABackend : RemoteBackend {
 
         // TODO : Change that obviously...
-        private static const string DEFAULT_LOCATION = "http://jira.dev.tradingscreen.com:8080";
+        private const string DEFAULT_LOCATION = "http://jira.dev.tradingscreen.com:8080";
 
         private string username;
         private Soup.URI base_uri;

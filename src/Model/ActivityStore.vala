@@ -119,13 +119,13 @@ namespace Activities.Model {
             var iter = find(activity);
             if (iter == null) {
                 warning("Can't find %s in the store", activity.to_string());
-                return;
+            } else {
+                debug("Removing in the store: %s", activity.to_string());
+                this.remove(ref iter);
+
+                this.deleted(activity);
             }
-
-            debug("Removing in the store: %s", activity.to_string());
-            this.remove(iter);
-
-            this.deleted(activity);
         }
     }
 }
+

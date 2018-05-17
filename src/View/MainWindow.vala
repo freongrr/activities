@@ -125,11 +125,11 @@ namespace Activities.View {
 
             // TODO : make the orientation a parmeter
             // TODO : when VERTICAL, the detail panel must be smaller
-            var split_panel = new Granite.Widgets.ThinPaned(Gtk.Orientation.HORIZONTAL);
+            var split_panel = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
             split_panel.pack1(scroller, false, true);
             split_panel.pack2(this.activity_detail_view, true, false);
 
-            var split_split_panel = new Granite.Widgets.ThinPaned();
+            var split_split_panel = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
             split_split_panel.pack1(this.project_list, false, true);
             split_split_panel.pack2(split_panel, true, true);
             this.add(split_split_panel);

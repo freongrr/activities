@@ -24,7 +24,7 @@ using Gtk;
 
 namespace Activities.Model {
 
-    public class TaskStore : ListStore {
+    public class TaskStore : Gtk.ListStore {
 
         // HACK - I would not need that if ListStore even gave me the created/deleted values...
         public signal void created(Task task);
@@ -97,3 +97,4 @@ namespace Activities.Model {
         }
     }
 }
+
